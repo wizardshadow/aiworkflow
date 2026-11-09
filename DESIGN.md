@@ -1,0 +1,12 @@
+# AI WORKFLOW — first five sections
+
+Reference: https://crox.framer.website/ . Content: supplied Google document, screens 1–5.
+Observed colors: #e3e7eb background; #1a1b1c text; orange CTA (matched #ff5b0b).
+Observed type: Apfel Grotezk for display, Geist for body; Geist Cyrillic used for Russian.
+Composition: strong black outer frame, ruled grids, oversized type, squared buttons, engineering photography/video, ticker, restrained reveal motion. Responsive layouts preserve reading order. Reduced motion and explicit pause supported.
+Assets are temporary CROX visuals requested by the owner. Image files copied locally; original video and fonts loaded from original source URLs.
+Duration confirmed by owner: 12 weeks in hero and curriculum.
+Registration destination not supplied: buttons open an honest preview dialog; no contact data collected or submission simulated.
+Only sections 1–5 implemented. No testimonials or additional source sections added.
+
+Typography: locally hosted Sonko, 400 body / 500 headings / 700 hero. 10px and 11px labels increased to 12px, CTA 16px, scenario outcomes 18px. Accessible smooth accordion, first month open. Continuous marquee.
