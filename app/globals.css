@@ -28,9 +28,10 @@ h1,h2,h3,.brand{font-weight:500}
 .module-title{display:block;font-size:34px;font-weight:500;margin-top:8px}
 .module-trigger:hover .module-title{color:var(--orange)}
 .module.is-open .module-icon{transform:rotate(45deg);color:var(--orange)}
-.module-panel{display:grid;grid-template-rows:0fr;visibility:hidden;transition:grid-template-rows .45s cubic-bezier(.22,1,.36,1),visibility .45s}
-.module.is-open .module-panel{grid-template-rows:1fr;visibility:visible}
-.module-clip{min-height:0;overflow:hidden}
+.module-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.22,1,.36,1)}
+.module.is-open .module-panel{grid-template-rows:1fr}
+.module-clip{overflow:hidden}
+.module.is-open .module-clip{min-height:min-content}
 @media(max-width:760px){
 .hero h1{font-size:12.75vw}
 .module-trigger{grid-template-columns:30px 1fr 25px;gap:15px;padding:24px 0}
