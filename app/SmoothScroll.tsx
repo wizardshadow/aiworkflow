@@ -5,13 +5,16 @@ import Lenis from "lenis";
 
 let lenisInstance: Lenis | null = null;
 
-export function scrollToId(id: string, offset = -75) {
+const HEADER_SCROLL_OFFSET = -76;
+
+export function scrollToId(id: string, offset = HEADER_SCROLL_OFFSET) {
   const el = document.getElementById(id);
   if (!el) return;
   if (lenisInstance) {
     lenisInstance.scrollTo(el, { offset, duration: 1.2 });
   } else {
-    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    const top = el.getBoundingClientRect().top + window.scrollY + offset;
+    window.scrollTo({ top, behavior: "smooth" });
   }
 }
 
@@ -47,7 +50,7 @@ export default function SmoothScroll({ enabled }: { enabled: boolean }) {
       const el = document.getElementById(id);
       if (!el) return;
       event.preventDefault();
-      lenis.scrollTo(el, { offset: -75, duration: 1.2 });
+      lenis.scrollTo(el, { offset: HEADER_SCROLL_OFFSET, duration: 1.2 });
       history.pushState(null, "", href);
     };
 
