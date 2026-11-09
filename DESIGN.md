@@ -9,4 +9,4 @@ Duration confirmed by owner: 12 weeks in hero and curriculum.
 Registration destination not supplied: buttons open an honest preview dialog; no contact data collected or submission simulated.
 Only sections 1–5 implemented. No testimonials or additional source sections added.
 
-Typography: locally hosted Sonko, 400 body / 500 headings / 700 hero. Letter-spacing is 0. Minimum size is 14px. CTA 16px, scenario outcomes 18px. The hero phrase «За 12 недель» is orange type without a background chip. Accessible smooth accordion, first month open. Continuous marquee.
+Typography: locally hosted Sonko, 400 body / 500 headings / 700 hero. Letter-spacing is 0 generally; paragraphs (`p`) use font-size 18px, letter-spacing 1px, font-weight 500. Minimum size is 14px for non-paragraph UI text. CTA 16px, scenario outcomes 18px. The hero phrase «За 12 недель» is orange type without a background chip. Accessible smooth accordion, first month open. Continuous marquee.
