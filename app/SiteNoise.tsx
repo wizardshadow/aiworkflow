@@ -43,9 +43,9 @@ export default function SiteNoise({ enabled = true }: { enabled?: boolean }) {
     let last = 0;
 
     const resize = () => {
-      // Half-res buffer → soft grain when CSS-scaled to viewport
-      const w = Math.max(1, Math.ceil(window.innerWidth / 2));
-      const h = Math.max(1, Math.ceil(window.innerHeight / 2));
+      // Full-res buffer → grain ~50% finer than previous half-res soft scale
+      const w = Math.max(1, Math.ceil(window.innerWidth));
+      const h = Math.max(1, Math.ceil(window.innerHeight));
       if (canvas.width !== w || canvas.height !== h) {
         canvas.width = w;
         canvas.height = h;

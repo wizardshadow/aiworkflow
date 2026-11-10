@@ -45,8 +45,8 @@ p{font-size:18px;letter-spacing:1px;font-weight:500}
 html[data-motion=off] .module-panel{transition:none}
 
 /* Animated film grain via canvas (app/SiteNoise.tsx) — soft overlay on #e3e7eb */
-.site-noise{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;z-index:9999;opacity:.5;mix-blend-mode:soft-light}
-html[data-motion=off] .site-noise{opacity:.4}
+.site-noise{position:fixed;inset:0;width:100%;height:100%;display:block;pointer-events:none;z-index:9999;opacity:.25;mix-blend-mode:soft-light}
+html[data-motion=off] .site-noise{opacity:.2}
 
 /* Hero staggered reveal on load */
 .hero-reveal{opacity:0;transform:translateY(28px);transition:opacity .85s cubic-bezier(.22,1,.36,1),transform .85s cubic-bezier(.22,1,.36,1);will-change:opacity,transform}
@@ -65,7 +65,7 @@ html[data-motion=off] .hero-reveal{opacity:1;transform:none;transition:none}
 @media(prefers-reduced-motion:reduce){
 .hero-reveal{opacity:1;transform:none;transition:none}
 /* Grain stays visible as a single static frame when motion is reduced */
-.site-noise{opacity:.4}
+.site-noise{opacity:.2}
 html.lenis.lenis-smooth{scroll-behavior:auto!important}
 }
 
