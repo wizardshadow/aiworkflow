@@ -1,12 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSiteContent } from "../../hooks/useSiteContent";
 import SiteNoise from "../SiteNoise";
 
-const LOGIN_HREF =
-  "https://modulesclub.getcourse.ru/teach/control/stream/view/id/935999642";
-
 export default function SuccessPage() {
+  const c = useSiteContent();
   const [motion, setMotion] = useState(true);
 
   useEffect(() => {
@@ -28,19 +27,17 @@ export default function SuccessPage() {
       </header>
       <main id="main" className="success-page">
         <div className="success-inner">
-          <h1>Благодарю!</h1>
-          <p className="success-lead">Оплата прошла успешно!</p>
-          <p>
-            Все инструкции отправлены тебе на почту, указанную при регистрации.
-          </p>
-          <p className="success-start">Стартуем 1 декабря.</p>
+          <h1>{c.success.title}</h1>
+          <p className="success-lead">{c.success.lead}</p>
+          <p>{c.success.body}</p>
+          <p className="success-start">{c.success.start}</p>
           <a
             className="button"
-            href={LOGIN_HREF}
+            href={c.success.loginUrl}
             target="_blank"
             rel="noopener noreferrer"
           >
-            Войти в систему. <span>↗</span>
+            {c.success.loginLabel} <span>↗</span>
           </a>
         </div>
       </main>

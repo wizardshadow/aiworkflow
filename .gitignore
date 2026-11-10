@@ -30,6 +30,7 @@ yarn-error.log*
 .env*
 .dev.vars*
 *.pem
+/cpanel/config.local.php
 
 # Checkout-local tool state
 /.wrangler/
