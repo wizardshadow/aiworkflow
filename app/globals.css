@@ -106,10 +106,10 @@ footer.site-footer{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;padding
 .audience-grid{display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--ink)}
 .audience-col{padding:28px 32px 8px;display:flex;flex-direction:column;min-height:100%}
 .audience-col.fit{background:#f0f2f3;border-right:1px solid var(--ink)}
-.audience-col.skip{background:#c8cfd5}
+.audience-col.nofit{background:#c8cfd5}
 .audience-top{display:flex;justify-content:space-between;align-items:center;font-size:14px;margin-bottom:8px}
 .audience-top>span:last-child{font-size:34px;line-height:1;color:var(--orange)}
-.audience-col.skip .audience-top>span:last-child{color:var(--ink)}
+.audience-col.nofit .audience-top>span:last-child{color:var(--ink)}
 .audience-col ul{list-style:none;margin:0;padding:0}
 .audience-col li{display:flex;gap:18px;border-top:1px solid #aeb5bb;padding:18px 0}
 .audience-col li>span{font-size:22px;line-height:1.2;flex-shrink:0}
@@ -175,6 +175,7 @@ footer.site-footer{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;padding
 .audience-grid{grid-template-columns:1fr}
 .audience-col.fit{border-right:0;border-bottom:1px solid var(--ink)}
 .audience-col{padding:24px 22px 6px}
+.audience-col.nofit{border-bottom:0}
 .pricing-offer{padding:26px 22px}
 .price-row{flex-wrap:wrap}
 .button-lg{width:100%;gap:24px;padding:22px 20px;font-size:16px}
