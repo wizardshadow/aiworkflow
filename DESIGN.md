@@ -10,4 +10,4 @@ Registration destination not supplied: buttons open an honest preview dialog; no
 
 Sections: hero; 01 scenarios; 02 market; 03 workflow; 04 program (accordion, first month open); 05 proof (speaker quote + metrics). Nav links: подход, workflow, программа, доказательства.
 Program weeks follow the Google Doc topics/results; month headers use contiguous weeks 1–4 / 5–8 / 9–12 so the table stays a clean 12-week map. Hero phrase «За 12 недель» is orange type without a background chip. Continuous marquee.
-Motion (ref. bymonolog.com): fixed SVG noise/grain overlay (`pointer-events: none`); staggered hero reveal on load; Lenis inertia smooth scroll for wheel and in-page anchors. Respects `prefers-reduced-motion` and the hero pause toggle.
+Motion (ref. bymonolog.com): animated canvas film grain (`app/SiteNoise.tsx`, soft-light overlay, `pointer-events: none`); staggered hero reveal on load; Lenis inertia smooth scroll for wheel and in-page anchors. Respects `prefers-reduced-motion` and the hero pause toggle (grain freezes to one frame).
