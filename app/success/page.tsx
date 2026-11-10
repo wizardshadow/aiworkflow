@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import SiteNoise from "../SiteNoise";
 
-/** Placeholder: no login / cabinet URL exists on the site yet. */
-const LOGIN_HREF = "#";
+const LOGIN_HREF =
+  "https://modulesclub.getcourse.ru/teach/control/stream/view/id/935999642";
 
 export default function SuccessPage() {
   const [motion, setMotion] = useState(true);
@@ -34,7 +34,12 @@ export default function SuccessPage() {
             Все инструкции отправлены тебе на почту, указанную при регистрации.
           </p>
           <p className="success-start">Стартуем 1 декабря.</p>
-          <a className="button" href={LOGIN_HREF}>
+          <a
+            className="button"
+            href={LOGIN_HREF}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
             Войти в систему. <span>↗</span>
           </a>
         </div>
