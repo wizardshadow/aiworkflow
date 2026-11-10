@@ -57,6 +57,7 @@ const [motion,setMotion]=useState(true);
 const [heroReady,setHeroReady]=useState(false);
 const dialog=useRef<HTMLDialogElement>(null);
 const video=useRef<HTMLVideoElement>(null);
+const closingTimer=useRef<number|null>(null);
 
 useEffect(()=>{
   const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -73,7 +74,68 @@ useEffect(()=>{
   else video.current?.pause();
 },[motion]);
 
-const enroll=()=>dialog.current?.showModal();
+const clearClosingTimer=()=>{
+  if(closingTimer.current!==null){
+    window.clearTimeout(closingTimer.current);
+    closingTimer.current=null;
+  }
+};
+
+const enroll=()=>{
+  const el=dialog.current;
+  if(!el||el.open)return;
+  clearClosingTimer();
+  el.classList.remove('is-closing');
+  el.showModal();
+  // Two frames so [open] paints at opacity 0 before .is-open transitions in.
+  requestAnimationFrame(()=>requestAnimationFrame(()=>el.classList.add('is-open')));
+};
+
+const closeEnroll=()=>{
+  const el=dialog.current;
+  if(!el?.open||el.classList.contains('is-closing'))return;
+  const instant=document.documentElement.dataset.motion==='off';
+  if(instant){
+    clearClosingTimer();
+    el.classList.remove('is-open','is-closing');
+    el.close();
+    return;
+  }
+  el.classList.add('is-closing');
+  el.classList.remove('is-open');
+  const finish=()=>{
+    clearClosingTimer();
+    el.removeEventListener('transitionend',onEnd);
+    el.classList.remove('is-closing');
+    if(el.open)el.close();
+  };
+  const onEnd=(e:TransitionEvent)=>{
+    if(e.target!==el||e.propertyName!=='opacity')return;
+    finish();
+  };
+  el.addEventListener('transitionend',onEnd);
+  closingTimer.current=window.setTimeout(finish,450);
+};
+
+useEffect(()=>{
+  const el=dialog.current;
+  if(!el)return;
+  const onCancel=(e:Event)=>{
+    e.preventDefault();
+    closeEnroll();
+  };
+  const onClose=()=>{
+    clearClosingTimer();
+    el.classList.remove('is-open','is-closing');
+  };
+  el.addEventListener('cancel',onCancel);
+  el.addEventListener('close',onClose);
+  return()=>{
+    el.removeEventListener('cancel',onCancel);
+    el.removeEventListener('close',onClose);
+    clearClosingTimer();
+  };
+},[]);
 
 return <>
 <SmoothScroll enabled={motion}/>
@@ -109,5 +171,5 @@ return <>
 <footer className="site-footer"><div className="footer-brand"><a className="brand" href="#top">AI WORKFLOW <span className="brand-mark">↗</span></a><p>© AI WorkFlow — Стань незаменимым специалистом способным создать и вести проект от брифа до релиза готового продукта</p></div><div className="footer-legal"><p>ИП АНДРЕЙКО АРТУР ЕВГЕНЬЕВИЧ / ОГРН 309616705200021 / ИНН 616706226701</p><div className="footer-links"><a href="#offer">Договор оферты</a><span aria-hidden="true">|</span><a href="#privacy">Политика конфиденциальности</a><a href="#top">НАВЕРХ ↑</a></div></div></footer>
 <div id="offer" className="legal-anchor" hidden aria-hidden="true"/>
 <div id="privacy" className="legal-anchor" hidden aria-hidden="true"/>
-<dialog className="enroll-dialog" ref={dialog} onClick={e=>{if(e.target===dialog.current)dialog.current.close()}}><button className="dialog-close" onClick={()=>dialog.current?.close()} aria-label="Закрыть">×</button><span className="small enroll-dialog-label">AI WORKFLOW / ПЕРВЫЙ ПОТОК</span><h2 className="enroll-dialog-title">Записаться</h2><div className="enroll-dialog-widget"><GetCourseEnrollWidget/></div><p className="enroll-dialog-note">Доступна беспроцентная рассрочка на 3 / 6 / 10 месяцев</p></dialog>
+<dialog className="enroll-dialog" ref={dialog} onClick={e=>{if(e.target===dialog.current)closeEnroll()}}><button className="dialog-close" onClick={closeEnroll} aria-label="Закрыть">×</button><span className="small enroll-dialog-label">AI WORKFLOW / ПЕРВЫЙ ПОТОК</span><h2 className="enroll-dialog-title">Записаться</h2><div className="enroll-dialog-widget"><GetCourseEnrollWidget/></div><p className="enroll-dialog-note">Доступна беспроцентная рассрочка на 3 / 6 / 10 месяцев</p></dialog>
 </>}
