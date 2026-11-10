@@ -185,3 +185,49 @@ footer.site-footer{display:grid;grid-template-columns:1.2fr 1fr;gap:40px;padding
 footer.site-footer{grid-template-columns:1fr;gap:28px;padding:32px var(--pad) 36px;align-items:start}
 .footer-links a:last-child{margin-left:0}
 }
+
+/* Success / thank-you page */
+.success-header .brand{padding:0 var(--pad);margin-right:auto}
+.success-page{
+  min-height:calc(100vh - 72px);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:48px var(--pad) 72px;
+  background-image:linear-gradient(to right,transparent calc(100% - 1px),#cdd2d7 1px);
+  background-size:25% 100%;
+}
+.success-inner{max-width:640px;width:100%}
+.success-inner h1{
+  font-family:Sonko,Arial,sans-serif;
+  font-weight:700;
+  font-size:clamp(48px,8vw,96px);
+  line-height:.95;
+  margin-bottom:28px;
+}
+.success-lead{
+  font-size:clamp(22px,2.4vw,32px);
+  font-weight:500;
+  line-height:1.25;
+  margin-bottom:18px;
+}
+.success-inner>p{
+  font-size:18px;
+  line-height:1.55;
+  font-weight:500;
+  letter-spacing:1px;
+  color:#5b646c;
+  margin-bottom:14px;
+  max-width:520px;
+}
+.success-start{
+  color:var(--ink)!important;
+  font-weight:600!important;
+  margin:8px 0 36px!important;
+}
+.success-inner .button{min-width:min(100%,320px)}
+@media(max-width:760px){
+.success-page{min-height:calc(100vh - 60px);padding:36px var(--pad) 56px;align-items:flex-start}
+.success-inner h1{font-size:clamp(40px,12vw,64px);margin-bottom:22px}
+.success-inner .button{width:100%}
+}
