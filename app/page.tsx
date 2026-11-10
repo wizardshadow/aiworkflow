@@ -1,8 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
+import GetCourseEnrollWidget from "./GetCourseEnrollWidget";
 import ProgramModule from "./ProgramModule";
 import SiteNoise from "./SiteNoise";
-import SmoothScroll, { scrollToId } from "./SmoothScroll";
+import SmoothScroll from "./SmoothScroll";
 
 const scenarios = [
 ['Рынок уже заполнен теми, кто умеет генерировать картинки. Ты конкурируешь за проект с сотнями людей и даже с самими клиентами, которые научились генерировать.','Клиенты хотят больше за те же деньги, или платить меньше за твою обычную работу.','Джуны реально больше не нужны, с ними у бизнеса проблем в разы больше чем с нейронками. Клиент вбил промпт, получил посредственный результат, но зато без головняка.','Ты по-прежнему дизайнер. Просто всё чаще ловишь себя на мысли: «А не зря ли я вообще в этой профессии, и есть ли у неё будущее?»'],
@@ -108,5 +109,5 @@ return <>
 <footer className="site-footer"><div className="footer-brand"><a className="brand" href="#top">AI WORKFLOW <span className="brand-mark">↗</span></a><p>© AI WorkFlow — Стань незаменимым специалистом способным создать и вести проект от брифа до релиза готового продукта</p></div><div className="footer-legal"><p>ИП АНДРЕЙКО АРТУР ЕВГЕНЬЕВИЧ / ОГРН 309616705200021 / ИНН 616706226701</p><div className="footer-links"><a href="#offer">Договор оферты</a><span aria-hidden="true">|</span><a href="#privacy">Политика конфиденциальности</a><a href="#top">НАВЕРХ ↑</a></div></div></footer>
 <div id="offer" className="legal-anchor" hidden aria-hidden="true"/>
 <div id="privacy" className="legal-anchor" hidden aria-hidden="true"/>
-<dialog ref={dialog} onClick={e=>{if(e.target===dialog.current)dialog.current.close()}}><button className="dialog-close" onClick={()=>dialog.current?.close()} aria-label="Закрыть">×</button><span className="small">AI WORKFLOW / НОВЫЙ ПОТОК</span><h2>Твой следующий<br/>шаг.</h2><p>Старт 1 декабря · Осталось 11 мест из 20</p><p>Форма записи появится здесь после подключения регистрации. Сейчас можно изучить программу курса.</p><button className="button" onClick={()=>{dialog.current?.close();scrollToId('program')}}>СМОТРЕТЬ ПРОГРАММУ <span>↓</span></button></dialog>
+<dialog className="enroll-dialog" ref={dialog} onClick={e=>{if(e.target===dialog.current)dialog.current.close()}}><button className="dialog-close" onClick={()=>dialog.current?.close()} aria-label="Закрыть">×</button><span className="small enroll-dialog-label">AI WORKFLOW / ПЕРВЫЙ ПОТОК</span><h2 className="enroll-dialog-title">Записаться</h2><div className="enroll-dialog-widget"><GetCourseEnrollWidget/></div><p className="enroll-dialog-note">Доступна беспроцентная рассрочка на 3 / 6 / 10 месяцев</p></dialog>
 </>}
