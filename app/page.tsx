@@ -50,13 +50,23 @@ const valueStack:[string,string,boolean?][]=[
 ['Чат поддержки с ответами на любые вопросы','10 000 ₽'],
 ['Три реальных рабочих кейса в портфолио','бесценно',true]
 ];
+const navItems=[
+['approach','ПОДХОД'],
+['workflow','WORKFLOW'],
+['program','ПРОГРАММА'],
+['proof','РЕЗУЛЬТАТ'],
+['pricing','СТОИМОСТЬ'],
+] as const;
 
 export default function Home(){
 const [menu,setMenu]=useState(false);
 const [motion,setMotion]=useState(true);
 const [heroReady,setHeroReady]=useState(false);
+const [activeNav,setActiveNav]=useState('');
 const dialog=useRef<HTMLDialogElement>(null);
 const video=useRef<HTMLVideoElement>(null);
+const navRef=useRef<HTMLElement>(null);
+const navLock=useRef<string|null>(null);
 const closingTimer=useRef<number|null>(null);
 
 useEffect(()=>{
@@ -137,11 +147,94 @@ useEffect(()=>{
   };
 },[]);
 
+useEffect(()=>{
+  const ids=navItems.map(([id])=>id);
+  const sections=ids
+    .map(id=>document.getElementById(id))
+    .filter((el):el is HTMLElement=>!!el);
+  if(!sections.length)return;
+  const ratios=new Map<string,number>();
+  const headerH=()=>(document.querySelector('.header') as HTMLElement|null)?.offsetHeight??72;
+  const resolve=()=>{
+    if(navLock.current){
+      setActiveNav(navLock.current);
+      return;
+    }
+    let best='';
+    let bestR=0;
+    for(const id of ids){
+      const r=ratios.get(id)??0;
+      if(r>bestR){bestR=r;best=id;}
+    }
+    if(bestR<=0){
+      const y=window.scrollY+headerH()+12;
+      best='';
+      for(const id of ids){
+        const el=document.getElementById(id);
+        if(el&&el.offsetTop<=y)best=id;
+      }
+    }
+    setActiveNav(best);
+  };
+  const io=new IntersectionObserver(entries=>{
+    for(const e of entries)ratios.set(e.target.id,e.isIntersecting?e.intersectionRatio:0);
+    resolve();
+  },{rootMargin:'-76px 0px -48% 0px',threshold:[0,.1,.25,.5,.75,1]});
+  sections.forEach(s=>io.observe(s));
+  const onScroll=()=>{
+    if(!navLock.current)return;
+    const el=document.getElementById(navLock.current);
+    if(!el){navLock.current=null;return;}
+    if(Math.abs(el.getBoundingClientRect().top-headerH())<56)navLock.current=null;
+  };
+  window.addEventListener('scroll',onScroll,{passive:true});
+  resolve();
+  return()=>{io.disconnect();window.removeEventListener('scroll',onScroll);};
+},[]);
+
+useEffect(()=>{
+  const nav=navRef.current;
+  if(!nav)return;
+  const bar=nav.querySelector('.nav-bar') as HTMLElement|null;
+  if(!bar)return;
+  const place=()=>{
+    if(getComputedStyle(nav).display==='none'){
+      bar.hidden=true;
+      return;
+    }
+    const link=activeNav
+      ?nav.querySelector(`a[href="#${activeNav}"]`) as HTMLElement|null
+      :null;
+    if(!link){
+      bar.hidden=true;
+      bar.style.width='0px';
+      return;
+    }
+    const nr=nav.getBoundingClientRect();
+    const lr=link.getBoundingClientRect();
+    bar.hidden=false;
+    bar.style.width=`${Math.max(lr.width,1)}px`;
+    bar.style.transform=`translate(${lr.left-nr.left+nav.scrollLeft}px,${lr.bottom-nr.top-3}px)`;
+  };
+  place();
+  const ro=typeof ResizeObserver!=='undefined'?new ResizeObserver(place):null;
+  ro?.observe(nav);
+  window.addEventListener('resize',place);
+  return()=>{ro?.disconnect();window.removeEventListener('resize',place);};
+},[activeNav,menu]);
+
+const onNavClick=(id:string)=>{
+  navLock.current=id;
+  setActiveNav(id);
+  setMenu(false);
+  window.setTimeout(()=>{if(navLock.current===id)navLock.current=null;},1400);
+};
+
 return <>
 <SmoothScroll enabled={motion}/>
 <SiteNoise enabled={motion}/>
 <a href="#main" className="skip">Перейти к содержимому</a>
-<header className="header"><a href="#top" className="brand">AI WORKFLOW<span className="brand-mark">↗</span></a><nav className={menu?'nav open':'nav'} aria-label="Главная навигация"><a href="#approach" onClick={()=>setMenu(false)}>ПОДХОД</a><a href="#workflow" onClick={()=>setMenu(false)}>WORKFLOW</a><a href="#program" onClick={()=>setMenu(false)}>ПРОГРАММА</a><a href="#proof" onClick={()=>setMenu(false)}>РЕЗУЛЬТАТ</a><a href="#pricing" onClick={()=>setMenu(false)}>СТОИМОСТЬ</a></nav><button className="header-cta" onClick={enroll}>ЗАПИСАТЬСЯ <span>↗</span></button><button className="menu-toggle" aria-label={menu?'Закрыть меню':'Открыть меню'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?'×':'☰'}</button></header>
+<header className="header"><a href="#top" className="brand">AI WORKFLOW<span className="brand-mark">↗</span></a><nav ref={navRef} className={menu?'nav open':'nav'} aria-label="Главная навигация"><span className="nav-bar" aria-hidden="true" hidden/>{navItems.map(([id,label])=><a key={id} href={'#'+id} aria-current={activeNav===id?'true':undefined} onClick={()=>onNavClick(id)}>{label}</a>)}</nav><button className="header-cta" onClick={enroll}>ЗАПИСАТЬСЯ <span>↗</span></button><button className="menu-toggle" aria-label={menu?'Закрыть меню':'Открыть меню'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?'×':'☰'}</button></header>
 <main id="main">
 <section id="top" className={heroReady?'hero is-ready':'hero'}>
 <div className="hero-kicker hero-reveal" data-d="1"><span><i className="dot"/> ПРАКТИЧЕСКИЙ КУРС ДЛЯ ДИЗАЙНЕРОВ</span><span>НОВЫЙ ПОТОК / 01 ДЕКАБРЯ</span></div>

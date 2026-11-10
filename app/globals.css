@@ -231,3 +231,29 @@ footer.site-footer{grid-template-columns:1fr;gap:28px;padding:32px var(--pad) 36
 .success-inner h1{font-size:clamp(40px,12vw,64px);margin-bottom:22px}
 .success-inner .button{width:100%}
 }
+
+/* Sticky nav active underline (scroll spy) */
+@media(min-width:761px){
+.nav{position:relative}
+}
+.nav-bar{
+  position:absolute;
+  left:0;
+  top:0;
+  height:3px;
+  width:0;
+  background:var(--orange);
+  pointer-events:none;
+  transform:translate(0,0);
+  transition:transform .25s cubic-bezier(.22,1,.36,1),width .25s cubic-bezier(.22,1,.36,1);
+  will-change:transform,width;
+  z-index:1;
+}
+.nav a[aria-current=true]{color:var(--orange)}
+html[data-motion=off] .nav-bar{transition:none}
+@media(prefers-reduced-motion:reduce){
+.nav-bar{transition:none}
+}
+@media(max-width:760px){
+.nav a{padding:6px 0}
+}
