@@ -4,7 +4,7 @@ Reference: https://crox.framer.website/ . Content: supplied Google document; scr
 Observed colors: #e3e7eb background; #1a1b1c text; orange CTA (matched #ff5b0b).
 Observed type: locally hosted Sonko, 400 body / 500 headings / 700 hero. Letter-spacing is 0 generally; paragraphs (`p`) use font-size 18px, letter-spacing 1px, font-weight 500. Minimum size is 14px for non-paragraph UI text.
 Composition: strong black outer frame, ruled grids, oversized type, squared buttons, engineering photography/video, ticker, restrained reveal motion. Responsive layouts preserve reading order. Reduced motion and explicit pause supported.
-Assets are temporary CROX visuals requested by the owner. Image files copied locally; original video and fonts loaded from original source URLs.
+Assets are temporary CROX visuals requested by the owner. Image files copied locally; hero video loads from http://aiworkflow.modules.club/assets/aihero.webm; fonts are local Sonko.
 Duration confirmed by owner: 12 weeks in hero and curriculum.
 Registration destination not supplied: buttons open an honest preview dialog; no contact data collected or submission simulated.
 
