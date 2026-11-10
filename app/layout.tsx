@@ -17,6 +17,14 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="ru">
+      <head>
+        <style
+          dangerouslySetInnerHTML={{
+            __html:
+              "html[data-preload=on],html:not([data-preload]) body:has(.site-preloader:not(.is-leaving)){overflow:hidden}.site-preloader{position:fixed;inset:0;z-index:999998;background:#000;color:#ff5b0b}",
+          }}
+        />
+      </head>
       <body className="antialiased">{children}</body>
     </html>
   );
