@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import ProgramModule from "./ProgramModule";
+import SiteNoise from "./SiteNoise";
 import SmoothScroll, { scrollToId } from "./SmoothScroll";
 
 const scenarios = [
@@ -55,7 +56,7 @@ const enroll=()=>dialog.current?.showModal();
 
 return <>
 <SmoothScroll enabled={motion}/>
-<div className="site-noise" aria-hidden="true"/>
+<SiteNoise enabled={motion}/>
 <a href="#main" className="skip">Перейти к содержимому</a>
 <header className="header"><a href="#top" className="brand">AI WORKFLOW<span className="brand-mark">↗</span></a><nav className={menu?'nav open':'nav'} aria-label="Главная навигация"><a href="#approach" onClick={()=>setMenu(false)}>ПОДХОД</a><a href="#workflow" onClick={()=>setMenu(false)}>WORKFLOW</a><a href="#program" onClick={()=>setMenu(false)}>ПРОГРАММА</a><a href="#proof" onClick={()=>setMenu(false)}>ДОКАЗАТЕЛЬСТВА</a></nav><button className="header-cta" onClick={enroll}>ЗАПИСАТЬСЯ <span>↗</span></button><button className="menu-toggle" aria-label={menu?'Закрыть меню':'Открыть меню'} aria-expanded={menu} onClick={()=>setMenu(!menu)}>{menu?'×':'☰'}</button></header>
 <main id="main">
