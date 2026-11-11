@@ -44,6 +44,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     <div class="toolbar">
       <div class="row-actions">
         <button class="btn btn-accent" type="button" id="saveBtn">Сохранить</button>
+        <a class="btn btn-accent" href="visual.php">Визуальный редактор</a>
         <button class="btn btn-ghost" type="button" id="reloadBtn">Обновить</button>
         <a class="btn btn-ghost" href="/" target="_blank" rel="noopener">Открыть сайт</a>
       </div>

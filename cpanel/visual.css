@@ -1,0 +1,329 @@
+:root {
+  --bg: #e3e7eb;
+  --ink: #1a1b1c;
+  --muted: #5c636a;
+  --line: #c5ccd3;
+  --panel: #f7f8fa;
+  --accent: #ff5b0b;
+  --ok: #1b7a3f;
+  --danger: #b42318;
+  --font: "Sonko", "IBM Plex Sans", "Segoe UI", sans-serif;
+}
+
+@font-face {
+  font-family: "Sonko";
+  src: url("/fonts/Sonko-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background:
+    linear-gradient(180deg, rgba(255, 91, 11, 0.06), transparent 32%),
+    radial-gradient(900px 420px at 80% -8%, #fff 0%, transparent 60%),
+    var(--bg);
+  color: var(--ink);
+  font-family: var(--font);
+}
+
+a { color: inherit; }
+
+.ve-top {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: blur(8px);
+  background: color-mix(in srgb, var(--bg) 86%, #fff);
+  border-bottom: 2px solid var(--ink);
+}
+
+.ve-top-inner {
+  width: min(1080px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 14px 0;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+}
+
+.ve-brand {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-decoration: none;
+}
+.ve-brand span { color: var(--accent); }
+
+.ve-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ve-btn {
+  appearance: none;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  padding: 10px 14px;
+  font: inherit;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.ve-btn:hover { background: rgba(26, 27, 28, 0.05); }
+.ve-btn-accent {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.ve-btn-accent:hover { filter: brightness(0.96); }
+.ve-btn:disabled { opacity: 0.55; cursor: wait; }
+
+.ve-status {
+  font-size: 13px;
+  color: var(--muted);
+  min-width: 10ch;
+}
+.ve-status.ok { color: var(--ok); }
+.ve-status.error { color: var(--danger); }
+
+.ve-shell {
+  width: min(1080px, calc(100% - 28px));
+  margin: 0 auto;
+  padding: 24px 0 72px;
+}
+
+.ve-intro {
+  margin: 0 0 22px;
+  max-width: 46rem;
+}
+.ve-intro h1 {
+  margin: 0 0 8px;
+  font-size: clamp(28px, 4vw, 40px);
+  letter-spacing: -0.02em;
+}
+.ve-intro p {
+  margin: 0;
+  color: var(--muted);
+}
+
+.ve-stack {
+  display: grid;
+  gap: 18px;
+}
+
+.ve-block {
+  position: relative;
+  background: var(--panel);
+  border: 1px solid var(--ink);
+  padding: 22px 22px 20px;
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.ve-block:hover,
+.ve-block.is-editing {
+  box-shadow: 8px 8px 0 rgba(26, 27, 28, 0.08);
+}
+.ve-block.is-editing {
+  border-color: var(--accent);
+  outline: 2px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  outline-offset: 2px;
+}
+
+.ve-block-head {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  align-items: flex-start;
+  margin-bottom: 14px;
+}
+.ve-block-label {
+  font-size: 12px;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ve-block-title {
+  margin: 4px 0 0;
+  font-size: 22px;
+  letter-spacing: -0.01em;
+}
+
+.ve-pencil {
+  appearance: none;
+  width: 42px;
+  height: 42px;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(4px);
+  transition: opacity 0.16s ease, transform 0.16s ease, background 0.16s ease;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+.ve-block:hover .ve-pencil,
+.ve-block.is-editing .ve-pencil,
+.ve-pencil:focus-visible {
+  opacity: 1;
+  transform: none;
+}
+.ve-pencil:hover,
+.ve-block.is-editing .ve-pencil {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.ve-pencil svg {
+  width: 18px;
+  height: 18px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.8;
+  stroke-linecap: square;
+  stroke-linejoin: miter;
+}
+
+.ve-preview {
+  display: grid;
+  gap: 10px;
+}
+.ve-kicker {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+.ve-lead {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  white-space: pre-wrap;
+}
+.ve-meta {
+  margin: 0;
+  color: var(--muted);
+  white-space: pre-wrap;
+}
+.ve-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--ink);
+  padding: 8px 12px;
+  background: #fff;
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+.ve-media {
+  display: grid;
+  gap: 8px;
+  margin-top: 8px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+.ve-media code {
+  font-size: 12px;
+  word-break: break-all;
+  color: var(--muted);
+}
+.ve-thumb {
+  width: min(220px, 100%);
+  aspect-ratio: 16 / 10;
+  object-fit: cover;
+  border: 1px solid var(--ink);
+  background: #ddd;
+  display: block;
+}
+.ve-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+.ve-card {
+  border: 1px solid var(--line);
+  background: #fff;
+  padding: 12px;
+}
+.ve-card h4 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+.ve-list {
+  margin: 0;
+  padding-left: 18px;
+}
+.ve-list li { margin: 0 0 6px; }
+
+.ve-edit {
+  display: none;
+  margin-top: 14px;
+  padding-top: 14px;
+  border-top: 1px dashed var(--line);
+  gap: 12px;
+}
+.ve-block.is-editing .ve-preview { display: none; }
+.ve-block.is-editing .ve-edit { display: grid; }
+
+.ve-field label {
+  display: block;
+  font-size: 11px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+  margin: 0 0 6px;
+}
+.ve-field input,
+.ve-field textarea {
+  width: 100%;
+  border: 1px solid var(--ink);
+  background: #fff;
+  color: var(--ink);
+  padding: 10px 12px;
+  font: inherit;
+}
+.ve-field textarea {
+  min-height: 84px;
+  resize: vertical;
+  line-height: 1.4;
+}
+.ve-edit-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+
+.ve-hint {
+  font-size: 13px;
+  color: var(--muted);
+  margin: 0;
+}
+
+@media (max-width: 720px) {
+  .ve-grid { grid-template-columns: 1fr; }
+  .ve-pencil {
+    opacity: 1;
+    transform: none;
+  }
+}
