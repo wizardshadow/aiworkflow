@@ -3,92 +3,156 @@
 import { useEffect, useRef } from "react";
 
 type DeferredExternalScriptsProps = {
-  html: string;
+  /** Optional hint from parent; component also fetches content.json itself. */
+  html?: string;
 };
+
+function contentJsonUrl(): string {
+  if (typeof window === "undefined") return "/content.json";
+  const base = document.querySelector("base")?.href;
+  try {
+    return new URL("content.json", base || window.location.href).pathname;
+  } catch {
+    return "/content.json";
+  }
+}
+
+function injectHtml(source: string): void {
+  const trimmed = source.trim();
+  if (!trimmed) return;
+
+  let host = document.getElementById("aw-external-scripts");
+  if (!host) {
+    host = document.createElement("div");
+    host.id = "aw-external-scripts";
+    host.setAttribute("data-aw-deferred", "1");
+    document.body.appendChild(host);
+  }
+
+  // Skip re-injecting identical payload.
+  if (
+    host.getAttribute("data-aw-payload") === trimmed &&
+    host.querySelector("script")
+  ) {
+    return;
+  }
+
+  host.replaceChildren();
+  host.setAttribute("data-aw-payload", trimmed);
+
+  const template = document.createElement("template");
+  template.innerHTML = trimmed;
+
+  const appendNode = (node: ChildNode) => {
+    if (node.nodeType !== Node.ELEMENT_NODE) {
+      host!.appendChild(node.cloneNode(true));
+      return;
+    }
+    const el = node as HTMLElement;
+    if (el.tagName === "SCRIPT") {
+      // Recreate so the browser executes the script (innerHTML scripts are inert).
+      const script = document.createElement("script");
+      for (const attr of el.attributes) {
+        script.setAttribute(attr.name, attr.value);
+      }
+      if (el.textContent) script.text = el.textContent;
+      if (!script.src && !script.getAttribute("type")) {
+        script.type = "text/javascript";
+      }
+      host!.appendChild(script);
+      return;
+    }
+    host!.appendChild(el.cloneNode(true));
+  };
+
+  template.content.childNodes.forEach((node) => appendNode(node));
+}
 
 /**
  * Injects trusted admin HTML/JS after window load + idle, at end of body.
- * Does not run in <head> and does not block LCP/FCP.
+ * Fetches content.json itself so Metrika is not stuck on empty DEFAULT seed
+ * while useSiteContent is still hydrating.
  */
 export default function DeferredExternalScripts({
-  html,
+  html = "",
 }: DeferredExternalScriptsProps) {
-  const injected = useRef(false);
+  const lastInjected = useRef("");
 
   useEffect(() => {
-    const source = (html || "").trim();
-    if (!source || injected.current) return;
-
+    let cancelled = false;
     let idleId = 0;
     let timeoutId = 0;
-    let cancelled = false;
+    const loadListeners: Array<() => void> = [];
 
-    const mount = () => {
-      if (cancelled || injected.current) return;
-      injected.current = true;
+    const run = (source: string) => {
+      if (cancelled) return;
+      const trimmed = (source || "").trim();
+      if (!trimmed || trimmed === lastInjected.current) return;
 
-      let host = document.getElementById("aw-external-scripts");
-      if (!host) {
-        host = document.createElement("div");
-        host.id = "aw-external-scripts";
-        host.setAttribute("data-aw-deferred", "1");
-        document.body.appendChild(host);
-      }
-      host.replaceChildren();
-
-      const template = document.createElement("template");
-      template.innerHTML = source;
-
-      const appendNode = (node: ChildNode) => {
-        if (node.nodeType !== Node.ELEMENT_NODE) {
-          host!.appendChild(node.cloneNode(true));
-          return;
+      const mount = () => {
+        if (cancelled) return;
+        try {
+          injectHtml(trimmed);
+          lastInjected.current = trimmed;
+        } catch {
+          /* keep page usable if admin HTML is malformed */
         }
-        const el = node as HTMLElement;
-        if (el.tagName === "SCRIPT") {
-          const script = document.createElement("script");
-          for (const attr of el.attributes) {
-            script.setAttribute(attr.name, attr.value);
-          }
-          if (el.textContent) script.text = el.textContent;
-          // Keep execution deferred relative to parser; we already waited for load/idle.
-          if (!script.src && !script.getAttribute("type")) {
-            script.type = "text/javascript";
-          }
-          host!.appendChild(script);
-          return;
-        }
-        host!.appendChild(el.cloneNode(true));
       };
 
-      template.content.childNodes.forEach((node) => appendNode(node));
-    };
-
-    const schedule = () => {
-      const ric = (
-        window as Window & {
-          requestIdleCallback?: (
-            cb: IdleRequestCallback,
-            opts?: IdleRequestOptions
-          ) => number;
+      const schedule = () => {
+        if (cancelled) return;
+        const ric = (
+          window as Window & {
+            requestIdleCallback?: (
+              cb: IdleRequestCallback,
+              opts?: IdleRequestOptions
+            ) => number;
+          }
+        ).requestIdleCallback;
+        if (typeof ric === "function") {
+          idleId = ric(() => mount(), { timeout: 1500 });
+        } else {
+          timeoutId = window.setTimeout(mount, 0);
         }
-      ).requestIdleCallback;
-      if (typeof ric === "function") {
-        idleId = ric(() => mount(), { timeout: 3500 });
-      } else {
-        timeoutId = window.setTimeout(mount, 1);
+      };
+
+      if (document.readyState === "complete") {
+        schedule();
+        return;
       }
+
+      const onLoad = () => schedule();
+      window.addEventListener("load", onLoad, { once: true });
+      loadListeners.push(onLoad);
+      // If load raced between the readyState check and addEventListener.
+      timeoutId = window.setTimeout(() => {
+        if (document.readyState === "complete") schedule();
+      }, 0);
     };
 
-    if (document.readyState === "complete") {
-      schedule();
-    } else {
-      window.addEventListener("load", schedule, { once: true });
-    }
+    // 1) Parent hint (may be empty DEFAULT on first paint).
+    if (html.trim()) run(html);
+
+    // 2) Authoritative runtime fetch — same file cpanel writes.
+    fetch(`${contentJsonUrl()}?t=${Date.now()}`, { cache: "no-store" })
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (cancelled || !data) return;
+        const fromJson =
+          typeof data.externalScriptsHtml === "string"
+            ? data.externalScriptsHtml
+            : "";
+        run(fromJson);
+      })
+      .catch(() => {
+        /* ignore — keep page without analytics */
+      });
 
     return () => {
       cancelled = true;
-      window.removeEventListener("load", schedule);
+      for (const onLoad of loadListeners) {
+        window.removeEventListener("load", onLoad);
+      }
       const cic = (
         window as Window & {
           cancelIdleCallback?: (id: number) => void;
