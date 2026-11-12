@@ -4,6 +4,8 @@ export const metadata: Metadata = {
   title: "Благодарю! — AI WORKFLOW",
   description:
     "Оплата прошла успешно. Инструкции отправлены на почту. Старт курса — 1 декабря.",
+  robots: { index: false, follow: false },
+  alternates: { canonical: "/success.html" },
 };
 
 export default function SuccessLayout({

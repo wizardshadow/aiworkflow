@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /cpanel
+
+Sitemap: https://aiworkflow.modules.club/sitemap.xml
