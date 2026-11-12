@@ -129,7 +129,13 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
 
   function collectFrom(root) {
     root.querySelectorAll('[data-path]').forEach((el) => {
-      setPath(state.content, el.getAttribute('data-path'), el.value);
+      const path = el.getAttribute('data-path');
+      let value = el.value;
+      if (path === 'seats.remaining' || path === 'seats.total') {
+        const n = parseInt(String(value).replace(/[^\d-]/g, ''), 10);
+        value = Number.isFinite(n) ? n : 0;
+      }
+      setPath(state.content, path, value);
     });
     root.querySelectorAll('[data-list-path]').forEach((el) => {
       const items = el.value.split('\n').map((s) => s.trim()).filter(Boolean);
@@ -164,14 +170,38 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
     const root = document.getElementById('blocks');
     const openId = state.editing;
 
+    const seats = c.seats || { remaining: 0, total: 0 };
+    const seatsLeft = `Осталось ${seats.remaining} мест из ${seats.total}`;
+
     const html = [
+      blockShell('seats', 'Места', 'Единое поле мест', `
+        <p class="ve-lead">${escapeHtml(seatsLeft)}</p>
+        <p class="ve-meta">Всего в группе: ${escapeHtml(String(seats.total))} · подпись статуса: ${escapeHtml(c.hero.seatsLabel || '')}</p>
+        <p class="ve-meta">Hero: ${escapeHtml(seatsLeft)}${c.hero.startNote ? ' · ' + escapeHtml(c.hero.startNote) : ''}</p>
+        <p class="ve-meta">Final: ${c.final.startNote ? escapeHtml(c.final.startNote) + ' · ' : ''}${escapeHtml(seatsLeft)}</p>
+      `, `
+        ${field('Осталось', 'seats.remaining')}
+        ${field('Всего в группе', 'seats.total')}
+        ${field('Подпись «МЕСТ В ГРУППЕ»', 'hero.seatsLabel')}
+        ${field('Hero — приписка после мест', 'hero.startNote')}
+        ${field('Final — приписка перед местами', 'final.startNote')}
+      `),
+
+      blockShell('scripts', 'Скрипты', 'Внешние скрипты / аналитика', `
+        <p class="ve-meta">Инъекция после window <code>load</code> + <code>requestIdleCallback</code> в конец body.</p>
+        <pre style="white-space:pre-wrap;font-size:12px;margin:0;background:#fff;border:1px solid var(--line);padding:12px;">${escapeHtml(c.externalScriptsHtml || '(пусто)')}</pre>
+      `, `
+        ${field('HTML / script', 'externalScriptsHtml', true)}
+        <p class="ve-hint">Доверенный код админа. Не синхронный head.</p>
+      `),
+
       blockShell('hero', 'Hero', 'Первый экран', `
         <div class="ve-kicker"><span>${escapeHtml(c.hero.kickerLeft)}</span><span>${escapeHtml(c.hero.kickerRight)}</span></div>
         <div class="ve-chip">${escapeHtml(c.hero.offer)}</div>
         <p class="ve-lead"><strong>${escapeHtml(c.hero.titleAi)}</strong> ${escapeHtml(c.hero.titleRest)}</p>
         <p class="ve-lead">${escapeHtml(c.hero.lead)} <span style="color:var(--accent)">${escapeHtml(c.hero.duration)}</span></p>
         <div class="ve-chip">${escapeHtml(c.hero.cta)} ↗</div>
-        <p class="ve-meta">${escapeHtml(c.hero.availability)} · ${escapeHtml(c.hero.installments)}</p>
+        <p class="ve-meta">${escapeHtml(seatsLeft)}${c.hero.startNote ? ' · ' + escapeHtml(c.hero.startNote) : ''} · ${escapeHtml(c.hero.installments)}</p>
         <div class="ve-media"><span>Video URL</span><code>${escapeHtml(c.hero.videoUrl)}</code></div>
       `, `
         ${field('Кикер слева', 'hero.kickerLeft')}
@@ -182,7 +212,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
         ${field('Лид', 'hero.lead', true)}
         ${field('Длительность', 'hero.duration')}
         ${field('CTA', 'hero.cta')}
-        ${field('Места', 'hero.availability')}
+        ${field('Приписка старта', 'hero.startNote')}
         ${field('Рассрочка', 'hero.installments')}
         ${field('Video URL', 'hero.videoUrl', false, 'url')}
         ${field('Визуал сверху слева', 'hero.visualTopLeft')}
@@ -386,6 +416,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
           <p class="ve-lead" style="color:#fff">${escapeHtml(c.pricing.price)} <s style="opacity:.6">${escapeHtml(c.pricing.priceOld)}</s></p>
           <p class="ve-meta" style="color:#c5ccd3">${escapeHtml(c.pricing.discountNote)}</p>
           <div class="ve-chip" style="background:var(--accent);border-color:var(--accent);color:#fff">${escapeHtml(c.pricing.cta)} ↗</div>
+          <p class="ve-meta" style="color:#c5ccd3;margin-top:10px">${escapeHtml(seatsLeft)}</p>
         </div>
       `, `
         ${field('Лейбл слева', 'pricing.labelLeft')}
@@ -405,8 +436,8 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
         ${field('Скидка', 'pricing.discountNote')}
         ${field('Рассрочка', 'pricing.installments')}
         ${field('CTA попапа', 'pricing.cta')}
-        ${field('Места', 'pricing.availability')}
         ${field('Дедлайн', 'pricing.deadline')}
+        <p class="ve-hint">Места — в блоке «Единое поле мест».</p>
       `),
 
       blockShell('final', '08', 'Финал', `
@@ -414,7 +445,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
         <p class="ve-meta">${escapeHtml(c.final.p1)}</p>
         <p class="ve-lead">${nl(c.final.accent)}</p>
         <div class="ve-chip">${escapeHtml(c.final.cta)} ↗</div>
-        <p class="ve-meta">${escapeHtml(c.final.availability)}</p>
+        <p class="ve-meta">${c.final.startNote ? escapeHtml(c.final.startNote) + ' · ' : ''}${escapeHtml(seatsLeft)}</p>
       `, `
         ${field('Лейбл слева', 'final.labelLeft')}
         ${field('Лейбл справа', 'final.labelRight')}
@@ -422,7 +453,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
         ${field('Абзац', 'final.p1', true)}
         ${field('Акцент', 'final.accent', true)}
         ${field('CTA', 'final.cta')}
-        ${field('Места', 'final.availability')}
+        ${field('Приписка перед местами', 'final.startNote')}
       `),
 
       blockShell('footer', 'Footer', 'Подвал', `
@@ -513,10 +544,26 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
     }
   });
 
+  function ensureContentShape(content) {
+    const next = content && typeof content === 'object' ? content : {};
+    const rem = parseInt(next.seats?.remaining, 10);
+    const tot = parseInt(next.seats?.total, 10);
+    next.seats = {
+      remaining: Number.isFinite(rem) ? rem : 11,
+      total: Number.isFinite(tot) ? tot : 20,
+    };
+    if (typeof next.externalScriptsHtml !== 'string') next.externalScriptsHtml = '';
+    if (!next.hero || typeof next.hero !== 'object') next.hero = {};
+    if (!next.hero.startNote) next.hero.startNote = 'Старт 1 декабря';
+    if (!next.final || typeof next.final !== 'object') next.final = {};
+    if (!next.final.startNote) next.final.startNote = 'Старт 1 декабря';
+    return next;
+  }
+
   async function loadContent(showStatus = true) {
     if (showStatus) setStatus('Загрузка…');
     const data = await api('content');
-    state.content = data.content;
+    state.content = ensureContentShape(data.content);
     if (showStatus) setStatus('Готово', 'ok');
   }
 
@@ -525,12 +572,13 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
       const block = document.querySelector(`[data-block="${state.editing}"]`);
       if (block) collectFrom(block);
     }
+    state.content = ensureContentShape(state.content);
     const btn = document.getElementById('saveAllBtn');
     btn.disabled = true;
     setStatus('Сохранение…');
     try {
       const data = await api('save', { method: 'POST', body: { content: state.content } });
-      state.content = data.content;
+      state.content = ensureContentShape(data.content);
       state.editing = null;
       render();
       setStatus('Сохранено · сайт подхватит после обновления', 'ok');

@@ -1,7 +1,8 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
 import { useSiteContent } from "../hooks/useSiteContent";
-import { lines } from "../lib/site-content";
+import { lines, seatsLeftText } from "../lib/site-content";
+import DeferredExternalScripts from "./DeferredExternalScripts";
 import GetCourseEnrollWidget from "./GetCourseEnrollWidget";
 import ProgramModule from "./ProgramModule";
 import SiteNoise from "./SiteNoise";
@@ -276,12 +277,14 @@ export default function Home() {
   };
 
   const scenarios = [c.approach.scenarioA, c.approach.scenarioB];
+  const seatsLeft = seatsLeftText(c.seats);
 
   return (
     <>
       <SitePreloader heroVideo={video} />
       <SmoothScroll enabled={motion} />
       <SiteNoise enabled={motion} />
+      <DeferredExternalScripts html={c.externalScriptsHtml} />
       <a href="#main" className="skip">
         Перейти к содержимому
       </a>
@@ -346,7 +349,8 @@ export default function Home() {
                 {c.hero.cta} <span>↗</span>
               </button>
               <div className="availability hero-reveal" data-d="6">
-                <i className="dot" /> {c.hero.availability}
+                <i className="dot" /> {seatsLeft}
+                {c.hero.startNote ? ` · ${c.hero.startNote}` : ""}
               </div>
               <p className="installments hero-reveal" data-d="7">
                 {c.hero.installments}
@@ -393,7 +397,7 @@ export default function Home() {
               </div>
               <div>
                 <span>{c.hero.seatsLabel}</span>
-                <b>{c.hero.seatsValue}</b>
+                <b>{c.seats.total}</b>
               </div>
               <div className="status-arrow">↘</div>
               <span className="small">
@@ -748,7 +752,7 @@ export default function Home() {
                 {c.pricing.cta} <span>↗</span>
               </button>
               <div className="availability">
-                <i className="dot" /> {c.pricing.availability}
+                <i className="dot" /> {seatsLeft}
               </div>
               <p className="offer-deadline">{c.pricing.deadline}</p>
             </div>
@@ -770,7 +774,9 @@ export default function Home() {
               {c.final.cta} <span>↗</span>
             </button>
             <div className="availability">
-              <i className="dot" /> {c.final.availability}
+              <i className="dot" />
+              {c.final.startNote ? `${c.final.startNote} · ` : ""}
+              {seatsLeft}
             </div>
           </div>
         </section>

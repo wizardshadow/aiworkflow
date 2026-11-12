@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSiteContent } from "../../hooks/useSiteContent";
+import DeferredExternalScripts from "../DeferredExternalScripts";
 import SiteNoise from "../SiteNoise";
 
 export default function SuccessPage() {
@@ -17,6 +18,7 @@ export default function SuccessPage() {
   return (
     <>
       <SiteNoise enabled={motion} />
+      <DeferredExternalScripts html={c.externalScriptsHtml} />
       <a href="#main" className="skip">
         Перейти к содержимому
       </a>

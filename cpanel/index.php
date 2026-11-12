@@ -65,10 +65,12 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     csrf: <?= json_encode($csrf, JSON_UNESCAPED_UNICODE) ?>,
     authed: <?= $authed ?>,
     content: null,
-    section: 'media',
+    section: 'seats',
   };
 
   const SECTIONS = [
+    { id: 'seats', title: 'Места' },
+    { id: 'scripts', title: 'Скрипты' },
     { id: 'media', title: 'Медиа URL' },
     { id: 'hero', title: 'Hero' },
     { id: 'nav', title: 'Навигация' },
@@ -148,7 +150,13 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
 
   function collectFields(root = document) {
     root.querySelectorAll('[data-path]').forEach((el) => {
-      setPath(state.content, el.getAttribute('data-path'), el.value);
+      const path = el.getAttribute('data-path');
+      let value = el.value;
+      if (path === 'seats.remaining' || path === 'seats.total') {
+        const n = parseInt(String(value).replace(/[^\d-]/g, ''), 10);
+        value = Number.isFinite(n) ? n : 0;
+      }
+      setPath(state.content, path, value);
     });
   }
 
@@ -276,6 +284,30 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     const el = $('#editor');
     let html = '';
 
+    if (state.section === 'seats') {
+      const left = `Осталось ${c.seats?.remaining ?? '…'} мест из ${c.seats?.total ?? '…'}`;
+      html = `
+        <h2>Места</h2>
+        <p class="hint">Одно поле на весь сайт. На лендинге подставляется везде: hero, pricing, final и «МЕСТ В ГРУППЕ».</p>
+        <div class="grid-2">
+          ${field('Осталось', 'seats.remaining')}
+          ${field('Всего в группе', 'seats.total')}
+        </div>
+        <div class="block"><h3>Превью</h3><p>${escapeHtml(left)}</p></div>
+        ${field('Подпись в hero-статусе', 'hero.seatsLabel')}
+        ${field('Hero — приписка после мест', 'hero.startNote')}
+        ${field('Final — приписка перед местами', 'final.startNote')}
+      `;
+    }
+
+    if (state.section === 'scripts') {
+      html = `
+        <h2>Внешние скрипты</h2>
+        <p class="hint">HTML/JS метрик и аналитики. Вставляется в конец body после window load и requestIdleCallback — не в head, не блокирует LCP/FCP. Доверенный код администратора.</p>
+        ${field('Код (HTML / &lt;script&gt;)', 'externalScriptsHtml', true)}
+      `;
+    }
+
     if (state.section === 'media') {
       html = `
         <h2>Медиа URL</h2>
@@ -292,7 +324,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     if (state.section === 'hero') {
       html = `
         <h2>Hero</h2>
-        <p class="hint">Переносы строк в полях с несколькими строками — через Enter.</p>
+        <p class="hint">Переносы строк в полях с несколькими строками — через Enter. Места — в разделе «Места».</p>
         <div class="grid-2">
           ${field('Кикер слева', 'hero.kickerLeft')}
           ${field('Кикер справа', 'hero.kickerRight')}
@@ -305,7 +337,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
         ${field('Лид', 'hero.lead', true)}
         ${field('Длительность (акцент)', 'hero.duration')}
         ${field('CTA', 'hero.cta')}
-        ${field('Места / старт', 'hero.availability')}
+        ${field('Приписка старта (после мест)', 'hero.startNote')}
         ${field('Рассрочка', 'hero.installments')}
         <div class="grid-2">
           ${field('Визуал сверху слева', 'hero.visualTopLeft')}
@@ -319,7 +351,6 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
           ${field('Старт label', 'hero.startLabel')}
           ${field('Старт value', 'hero.startValue')}
           ${field('Места label', 'hero.seatsLabel')}
-          ${field('Места value', 'hero.seatsValue')}
         </div>
         ${field('Статус футер', 'hero.statusFooter', true)}
         ${field('Тикер', 'hero.ticker', true)}
@@ -499,8 +530,8 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
         ${field('Скидка до', 'pricing.discountNote')}
         ${field('Рассрочка', 'pricing.installments')}
         ${field('CTA', 'pricing.cta')}
-        ${field('Места', 'pricing.availability')}
         ${field('Дедлайн', 'pricing.deadline')}
+        <p class="hint">Строка мест берётся из раздела «Места».</p>
       `;
     }
 
@@ -515,7 +546,8 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
         ${field('Абзац', 'final.p1', true)}
         ${field('Акцент', 'final.accent', true)}
         ${field('CTA', 'final.cta')}
-        ${field('Места', 'final.availability')}
+        ${field('Приписка перед местами', 'final.startNote')}
+        <p class="hint">«Осталось N из M» — из раздела «Места».</p>
       `;
     }
 
@@ -559,10 +591,30 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     renderEditor();
   }
 
+  function ensureContentShape(content) {
+    const next = content && typeof content === 'object' ? content : {};
+    const rem = parseInt(next.seats?.remaining, 10);
+    const tot = parseInt(next.seats?.total, 10);
+    next.seats = {
+      remaining: Number.isFinite(rem) ? rem : 11,
+      total: Number.isFinite(tot) ? tot : 20,
+    };
+    if (typeof next.externalScriptsHtml !== 'string') next.externalScriptsHtml = '';
+    if (!next.hero || typeof next.hero !== 'object') next.hero = {};
+    if (!next.hero.startNote && next.hero.availability) {
+      const m = String(next.hero.availability).match(/·\s*(.+)$/);
+      if (m) next.hero.startNote = m[1].trim();
+    }
+    if (!next.hero.startNote) next.hero.startNote = 'Старт 1 декабря';
+    if (!next.final || typeof next.final !== 'object') next.final = {};
+    if (!next.final.startNote) next.final.startNote = 'Старт 1 декабря';
+    return next;
+  }
+
   async function loadContent() {
     setStatus('Загрузка…');
     const data = await api('content');
-    state.content = data.content;
+    state.content = ensureContentShape(data.content);
     setStatus('Загружено', 'ok');
     render();
   }
@@ -576,11 +628,12 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     collectValueStack();
     collectProofStats();
     collectNavItems();
+    state.content = ensureContentShape(state.content);
     setStatus('Сохранение…');
     $('#saveBtn').disabled = true;
     try {
       const data = await api('save', { method: 'POST', body: { content: state.content } });
-      state.content = data.content;
+      state.content = ensureContentShape(data.content);
       setStatus('Сохранено · сайт подхватит после обновления', 'ok');
     } catch (e) {
       setStatus('Ошибка: ' + e.message, 'error');
