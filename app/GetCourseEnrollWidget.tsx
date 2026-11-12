@@ -7,36 +7,49 @@ const GC_WIDGET_SRC =
   "https://modulesclub.getcourse.ru/pl/lite/widget/script?id=1681648";
 const GC_START_EVENT = `StartWidget${GC_WIDGET_SCRIPT_ID}`;
 
+type GetCourseEnrollWidgetProps = {
+  /** Load third-party widget only after enroll dialog opens. */
+  enabled?: boolean;
+};
+
 /** Mount GetCourse lite widget once into a stable host (script → iframe). */
-export default function GetCourseEnrollWidget() {
+export default function GetCourseEnrollWidget({
+  enabled = false,
+}: GetCourseEnrollWidgetProps) {
   const hostRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (!enabled) return;
     const host = hostRef.current;
     if (!host) return;
     if (host.querySelector("iframe")) return;
-    if (document.getElementById(GC_WIDGET_SCRIPT_ID)) return;
 
-    const script = document.createElement("script");
-    script.id = GC_WIDGET_SCRIPT_ID;
-    script.src = GC_WIDGET_SRC;
-    script.async = true;
+    let script = document.getElementById(
+      GC_WIDGET_SCRIPT_ID
+    ) as HTMLScriptElement | null;
 
     const startIfNeeded = () => {
-      // Lite widget listens for DOMContentLoaded OR StartWidget{id}.
-      // After first paint DOMContentLoaded has usually already fired.
       if (!document.getElementById(GC_WIDGET_SCRIPT_ID)) return;
       if (document.readyState === "loading") return;
       document.dispatchEvent(new Event(GC_START_EVENT));
     };
 
-    script.addEventListener("load", startIfNeeded);
-    host.appendChild(script);
+    if (!script) {
+      script = document.createElement("script");
+      script.id = GC_WIDGET_SCRIPT_ID;
+      script.src = GC_WIDGET_SRC;
+      script.async = true;
+      script.addEventListener("load", startIfNeeded);
+      // Append into host so the lite widget finds a nearby mount point.
+      host.appendChild(script);
+    } else {
+      startIfNeeded();
+    }
 
     return () => {
-      script.removeEventListener("load", startIfNeeded);
+      script?.removeEventListener("load", startIfNeeded);
     };
-  }, []);
+  }, [enabled]);
 
   return (
     <div

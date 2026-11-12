@@ -28,8 +28,12 @@ export default function Home() {
   const [motion, setMotion] = useState(true);
   const [heroReady, setHeroReady] = useState(false);
   const [activeNav, setActiveNav] = useState("");
+  const [enrollOpen, setEnrollOpen] = useState(false);
+  const [marketSrc, setMarketSrc] = useState<string | undefined>(undefined);
   const dialog = useRef<HTMLDialogElement>(null);
   const video = useRef<HTMLVideoElement>(null);
+  const marketVideo = useRef<HTMLVideoElement>(null);
+  const marketWrap = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const navLock = useRef<string | null>(null);
   const closingTimer = useRef<number | null>(null);
@@ -58,9 +62,40 @@ export default function Home() {
 
   useEffect(() => {
     document.documentElement.dataset.motion = motion ? "on" : "off";
-    if (motion) video.current?.play().catch(() => {});
-    else video.current?.pause();
+    if (motion) {
+      video.current?.play().catch(() => {});
+      marketVideo.current?.play().catch(() => {});
+    } else {
+      video.current?.pause();
+      marketVideo.current?.pause();
+    }
   }, [motion]);
+
+  // Defer market video until near viewport — keeps initial transfer lean.
+  useEffect(() => {
+    const wrap = marketWrap.current;
+    if (!wrap) return;
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (!entries.some((e) => e.isIntersecting)) return;
+        setMarketSrc(c.market.videoUrl);
+        io.disconnect();
+      },
+      { rootMargin: "240px 0px" }
+    );
+    io.observe(wrap);
+    return () => io.disconnect();
+  }, [c.market.videoUrl]);
+
+  useEffect(() => {
+    if (!marketSrc || !motion) return;
+    const el = marketVideo.current;
+    if (!el) return;
+    const play = () => el.play().catch(() => {});
+    if (el.readyState >= 2) play();
+    else el.addEventListener("loadeddata", play, { once: true });
+    return () => el.removeEventListener("loadeddata", play);
+  }, [marketSrc, motion]);
 
   const clearClosingTimer = () => {
     if (closingTimer.current !== null) {
@@ -73,6 +108,7 @@ export default function Home() {
     const el = dialog.current;
     if (!el || el.open) return;
     clearClosingTimer();
+    setEnrollOpen(true);
     el.classList.remove("is-closing");
     el.showModal();
     requestAnimationFrame(() =>
@@ -94,6 +130,7 @@ export default function Home() {
       clearClosingTimer();
       el.classList.remove("is-open", "is-closing");
       el.close();
+      setEnrollOpen(false);
       return;
     }
     el.classList.add("is-closing");
@@ -122,6 +159,7 @@ export default function Home() {
     const onClose = () => {
       clearClosingTimer();
       el.classList.remove("is-open", "is-closing");
+      setEnrollOpen(false);
     };
     el.addEventListener("cancel", onCancel);
     el.addEventListener("close", onClose);
@@ -440,14 +478,15 @@ export default function Home() {
             ))}
           </div>
           <div className="market-bottom">
-            <div className="market-image reveal">
+            <div className="market-image reveal" ref={marketWrap}>
               <video
+                ref={marketVideo}
                 autoPlay
                 muted
                 loop
                 playsInline
-                preload="auto"
-                src={c.market.videoUrl}
+                preload="none"
+                src={marketSrc}
                 aria-label="Поезд AI WORKFLOW — визуал новой реальности"
               />
             </div>
@@ -533,6 +572,9 @@ export default function Home() {
                       src={mod.imageUrl}
                       alt="Инженерный проект — временный визуальный материал CROX"
                       loading="lazy"
+                      decoding="async"
+                      width={1024}
+                      height={550}
                     />
                     <span>ПРОЕКТ 0{i + 1} / ПРАКТИКА</span>
                   </div>
@@ -578,6 +620,9 @@ export default function Home() {
                 src={c.proof.imageUrl}
                 alt={c.proof.imageAlt}
                 loading="lazy"
+                decoding="async"
+                width={1280}
+                height={720}
               />
             </div>
             <div className="proof-copy reveal">
@@ -766,7 +811,7 @@ export default function Home() {
         <span className="small enroll-dialog-label">{c.enroll.label}</span>
         <h2 className="enroll-dialog-title">{c.enroll.title}</h2>
         <div className="enroll-dialog-widget">
-          <GetCourseEnrollWidget />
+          <GetCourseEnrollWidget enabled={enrollOpen} />
         </div>
         <p className="enroll-dialog-note">{c.enroll.note}</p>
       </dialog>
