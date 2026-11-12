@@ -24,9 +24,18 @@ export type ProofStat = { a: string; b: string; c: string; label: string };
 
 export type ValueRow = { item: string; price: string; priceless?: boolean };
 
+export type SeatsContent = {
+  remaining: number;
+  total: number;
+};
+
 export type SiteContent = {
   version: number;
   updatedAt: string;
+  /** Единые места на весь лендинг. */
+  seats: SeatsContent;
+  /** HTML/JS метрик — инжектится после load/idle в конец body. */
+  externalScriptsHtml: string;
   nav: NavItem[];
   headerCta: string;
   hero: {
@@ -38,7 +47,8 @@ export type SiteContent = {
     lead: string;
     duration: string;
     cta: string;
-    availability: string;
+    /** Суффикс после «Осталось N из M», напр. «Старт 1 декабря». */
+    startNote: string;
     installments: string;
     videoUrl: string;
     visualTopLeft: string;
@@ -50,7 +60,6 @@ export type SiteContent = {
     startLabel: string;
     startValue: string;
     seatsLabel: string;
-    seatsValue: string;
     statusFooter: string;
     ticker: string;
   };
@@ -129,7 +138,6 @@ export type SiteContent = {
     discountNote: string;
     installments: string;
     cta: string;
-    availability: string;
     deadline: string;
   };
   final: {
@@ -139,7 +147,8 @@ export type SiteContent = {
     p1: string;
     accent: string;
     cta: string;
-    availability: string;
+    /** Префикс перед «Осталось N из M», напр. «Старт 1 декабря». */
+    startNote: string;
   };
   footer: {
     tagline: string;
@@ -164,8 +173,13 @@ export type SiteContent = {
 };
 
 export const DEFAULT_CONTENT: SiteContent = {
-  version: 1,
-  updatedAt: "2026-11-10T00:00:00.000Z",
+  version: 2,
+  updatedAt: "2026-11-12T00:00:00.000Z",
+  seats: {
+    remaining: 11,
+    total: 20,
+  },
+  externalScriptsHtml: "",
   nav: [
     { id: "approach", label: "ПОДХОД" },
     { id: "workflow", label: "WORKFLOW" },
@@ -184,7 +198,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     lead: "Из дизайнера в незаменимого партнёра любого бизнеса, ведущего продукт от идеи до результата.",
     duration: "За 12 недель.",
     cta: "ЗАПИСАТЬСЯ НА КУРС",
-    availability: "Осталось 11 мест из 20 · Старт 1 декабря",
+    startNote: "Старт 1 декабря",
     installments: "Рассрочка без переплат на 3 / 6 / 10 месяцев",
     videoUrl: "https://aiworkflow.modules.club/assets/aimain.webm",
     visualTopLeft: "HUMAN × MACHINE",
@@ -196,7 +210,6 @@ export const DEFAULT_CONTENT: SiteContent = {
     startLabel: "СТАРТ",
     startValue: "01.12",
     seatsLabel: "МЕСТ В ГРУППЕ",
-    seatsValue: "20",
     statusFooter: "ОТ ИДЕИ\nДО РЕЗУЛЬТАТА",
     ticker:
       "БРИФ И ИССЛЕДОВАНИЕ　/　КОНЦЕПЦИЯ　/　ПРОДАКШН　/　ЗАЩИТА И ЗАПУСК　/　ТВОЙ НОВЫЙ WORKFLOW　/　",
@@ -479,7 +492,6 @@ export const DEFAULT_CONTENT: SiteContent = {
     discountNote: "Скидка действует до 16 ноября",
     installments: "Доступна рассрочка без переплат на 3 / 6 / 10 месяцев",
     cta: "ЗАБРАТЬ МЕСТО СО СКИДКОЙ",
-    availability: "Осталось 14 мест из 20",
     deadline: "Набор закрывается 1 декабря или когда закончатся места",
   },
   final: {
@@ -491,7 +503,7 @@ export const DEFAULT_CONTENT: SiteContent = {
     accent:
       "Разница между этими двумя людьми — не талант. Не удача. Не связи.\nЭто 12 недель системной работы — которые начинаются с одной кнопки.",
     cta: "ЗАНЯТЬ МЕСТО НА ПОТОКЕ",
-    availability: "Старт 1 декабря · Осталось 14 мест из 20",
+    startNote: "Старт 1 декабря",
   },
   footer: {
     tagline:
@@ -517,6 +529,31 @@ export const DEFAULT_CONTENT: SiteContent = {
   },
 };
 
+export function seatsLeftText(seats: SeatsContent): string {
+  const remaining = Number.isFinite(seats.remaining)
+    ? seats.remaining
+    : DEFAULT_CONTENT.seats.remaining;
+  const total = Number.isFinite(seats.total)
+    ? seats.total
+    : DEFAULT_CONTENT.seats.total;
+  return `Осталось ${remaining} мест из ${total}`;
+}
+
+export function normalizeSeats(
+  partial: Partial<SeatsContent> | null | undefined
+): SeatsContent {
+  const remaining = Number(partial?.remaining);
+  const total = Number(partial?.total);
+  return {
+    remaining: Number.isFinite(remaining)
+      ? Math.max(0, Math.floor(remaining))
+      : DEFAULT_CONTENT.seats.remaining,
+    total: Number.isFinite(total)
+      ? Math.max(1, Math.floor(total))
+      : DEFAULT_CONTENT.seats.total,
+  };
+}
+
 export function mergeSiteContent(
   partial: Partial<SiteContent> | null | undefined
 ): SiteContent {
@@ -524,6 +561,11 @@ export function mergeSiteContent(
   return {
     ...DEFAULT_CONTENT,
     ...partial,
+    seats: normalizeSeats(partial.seats),
+    externalScriptsHtml:
+      typeof partial.externalScriptsHtml === "string"
+        ? partial.externalScriptsHtml
+        : DEFAULT_CONTENT.externalScriptsHtml,
     nav: partial.nav ?? DEFAULT_CONTENT.nav,
     hero: { ...DEFAULT_CONTENT.hero, ...partial.hero },
     approach: {
