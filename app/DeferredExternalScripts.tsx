@@ -7,6 +7,10 @@ type DeferredExternalScriptsProps = {
   html?: string;
 };
 
+/** Nodes we appended to <body> (no wrapper div). */
+let injectedNodes: ChildNode[] = [];
+let injectedFingerprint = "";
+
 function contentJsonUrl(): string {
   if (typeof window === "undefined") return "/content.json";
   const base = document.querySelector("base")?.href;
@@ -17,40 +21,56 @@ function contentJsonUrl(): string {
   }
 }
 
+function fingerprint(source: string): string {
+  let h = 0;
+  for (let i = 0; i < source.length; i++) {
+    h = (Math.imul(31, h) + source.charCodeAt(i)) | 0;
+  }
+  return `${source.length}:${h}`;
+}
+
+function clearPreviousInject(): void {
+  for (const node of injectedNodes) {
+    node.parentNode?.removeChild(node);
+  }
+  injectedNodes = [];
+  injectedFingerprint = "";
+  // Remove legacy wrapper from previous deploy.
+  document.getElementById("aw-external-scripts")?.remove();
+}
+
+/**
+ * Append trusted admin HTML as real DOM nodes at the end of <body>
+ * — actual <script> / <noscript> siblings of body children, not a div wrapper
+ * and not HTML stored in a data-* attribute.
+ */
 function injectHtml(source: string): void {
   const trimmed = source.trim();
   if (!trimmed) return;
 
-  let host = document.getElementById("aw-external-scripts");
-  if (!host) {
-    host = document.createElement("div");
-    host.id = "aw-external-scripts";
-    host.setAttribute("data-aw-deferred", "1");
-    document.body.appendChild(host);
-  }
+  const fp = fingerprint(trimmed);
+  if (fp === injectedFingerprint && injectedNodes.length > 0) return;
 
-  // Skip re-injecting identical payload.
-  if (
-    host.getAttribute("data-aw-payload") === trimmed &&
-    host.querySelector("script")
-  ) {
-    return;
-  }
-
-  host.replaceChildren();
-  host.setAttribute("data-aw-payload", trimmed);
+  clearPreviousInject();
 
   const template = document.createElement("template");
   template.innerHTML = trimmed;
+  const created: ChildNode[] = [];
 
   const appendNode = (node: ChildNode) => {
-    if (node.nodeType !== Node.ELEMENT_NODE) {
-      host!.appendChild(node.cloneNode(true));
+    if (node.nodeType === Node.TEXT_NODE) {
+      const text = node.textContent ?? "";
+      if (!text.trim()) return;
+      const textNode = document.createTextNode(text);
+      document.body.appendChild(textNode);
+      created.push(textNode);
       return;
     }
+    if (node.nodeType !== Node.ELEMENT_NODE) return;
+
     const el = node as HTMLElement;
     if (el.tagName === "SCRIPT") {
-      // Recreate so the browser executes the script (innerHTML scripts are inert).
+      // Recreate so the browser executes (innerHTML <script> is inert).
       const script = document.createElement("script");
       for (const attr of el.attributes) {
         script.setAttribute(attr.name, attr.value);
@@ -59,13 +79,19 @@ function injectHtml(source: string): void {
       if (!script.src && !script.getAttribute("type")) {
         script.type = "text/javascript";
       }
-      host!.appendChild(script);
+      document.body.appendChild(script);
+      created.push(script);
       return;
     }
-    host!.appendChild(el.cloneNode(true));
+
+    const clone = el.cloneNode(true) as HTMLElement;
+    document.body.appendChild(clone);
+    created.push(clone);
   };
 
-  template.content.childNodes.forEach((node) => appendNode(node));
+  Array.from(template.content.childNodes).forEach(appendNode);
+  injectedNodes = created;
+  injectedFingerprint = fp;
 }
 
 /**
@@ -124,16 +150,13 @@ export default function DeferredExternalScripts({
       const onLoad = () => schedule();
       window.addEventListener("load", onLoad, { once: true });
       loadListeners.push(onLoad);
-      // If load raced between the readyState check and addEventListener.
       timeoutId = window.setTimeout(() => {
         if (document.readyState === "complete") schedule();
       }, 0);
     };
 
-    // 1) Parent hint (may be empty DEFAULT on first paint).
     if (html.trim()) run(html);
 
-    // 2) Authoritative runtime fetch — same file cpanel writes.
     fetch(`${contentJsonUrl()}?t=${Date.now()}`, { cache: "no-store" })
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
