@@ -115,6 +115,13 @@ export type SiteContent = {
     cta: string;
     stats: ProofStat[];
   };
+  poster: {
+    wordmark: string;
+    headline: string;
+    note: string;
+    imageUrl: string;
+    imageAlt: string;
+  };
   audience: {
     labelLeft: string;
     heading: string;
@@ -436,6 +443,13 @@ export const DEFAULT_CONTENT: SiteContent = {
       { a: "12", b: "НЕДЕЛЬ", c: "ПРАКТИКИ", label: "НА СВОИХ ПРОЕКТАХ" },
     ],
   },
+  poster: {
+    wordmark: "AIWORKFLOW",
+    headline: "Первый в мире курс который невозможно не успеть пройти",
+    note: "Потому что после внедрения агентов все что ты будешь делать, это давать инструкции нейронкам, оценивать результат и вносить правки",
+    imageUrl: "/assets/pace-device.png",
+    imageAlt: "Подвесной модуль с индикатором AI",
+  },
   audience: {
     labelLeft: "06 / ДЛЯ КОГО",
     heading: "Честно о том,\nкому это не нужно.",
@@ -606,6 +620,7 @@ export function mergeSiteContent(
       ...partial.proof,
       stats: partial.proof?.stats ?? DEFAULT_CONTENT.proof.stats,
     },
+    poster: { ...DEFAULT_CONTENT.poster, ...partial.poster },
     audience: {
       ...DEFAULT_CONTENT.audience,
       ...partial.audience,

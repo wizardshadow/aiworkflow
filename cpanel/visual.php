@@ -381,6 +381,19 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
           </div>`).join('')}
       `),
 
+      blockShell('poster', '05+', 'Постер', `
+        <p class="ve-lead">${escapeHtml(c.poster.wordmark)}</p>
+        <p class="ve-lead" style="color:var(--accent)">${escapeHtml(c.poster.headline)}</p>
+        <p class="ve-meta">${escapeHtml(c.poster.note)}</p>
+        <div class="ve-media"><span>Модуль</span><code>${escapeHtml(c.poster.imageUrl)}</code></div>
+      `, `
+        ${field('Вордмарк', 'poster.wordmark')}
+        ${field('Заголовок', 'poster.headline', true)}
+        ${field('Подпись', 'poster.note', true)}
+        ${field('Картинка URL', 'poster.imageUrl', false, 'url')}
+        ${field('Alt', 'poster.imageAlt')}
+      `),
+
       blockShell('audience', '06', 'Для кого', `
         <p class="ve-lead">${nl(c.audience.heading)}</p>
         <p class="ve-meta">${escapeHtml(c.audience.sub)}</p>
@@ -557,6 +570,12 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
     if (!next.hero.startNote) next.hero.startNote = 'Старт 1 декабря';
     if (!next.final || typeof next.final !== 'object') next.final = {};
     if (!next.final.startNote) next.final.startNote = 'Старт 1 декабря';
+    if (!next.poster || typeof next.poster !== 'object') next.poster = {};
+    if (!next.poster.wordmark) next.poster.wordmark = 'AIWORKFLOW';
+    if (!next.poster.headline) next.poster.headline = 'Первый в мире курс который невозможно не успеть пройти';
+    if (!next.poster.note) next.poster.note = 'Потому что после внедрения агентов все что ты будешь делать, это давать инструкции нейронкам, оценивать результат и вносить правки';
+    if (!next.poster.imageUrl) next.poster.imageUrl = '/assets/pace-device.png';
+    if (!next.poster.imageAlt) next.poster.imageAlt = 'Подвесной модуль с индикатором AI';
     return next;
   }
 
