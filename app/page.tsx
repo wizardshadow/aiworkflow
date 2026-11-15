@@ -663,6 +663,40 @@ export default function Home() {
           </div>
         </section>
 
+        <section id="poster" className="section poster" aria-labelledby="poster-title">
+          <div className="poster-frame">
+            <img
+              className="poster-bg"
+              src="/assets/pace-bg.webp"
+              alt=""
+              width={1920}
+              height={1076}
+            />
+            <img
+              className="poster-lines"
+              src="/assets/pace-lines.svg"
+              alt=""
+              width={1701}
+              height={1075}
+            />
+            <div className="poster-device">
+              <img
+                src={c.poster.imageUrl}
+                alt={c.poster.imageAlt}
+                width={2048}
+                height={1152}
+              />
+            </div>
+            <div className="poster-copy reveal">
+              <p className="poster-mark">{c.poster.wordmark}</p>
+              <h2 id="poster-title" className="poster-headline">
+                {c.poster.headline}
+              </h2>
+              <p className="poster-note">{c.poster.note}</p>
+            </div>
+          </div>
+        </section>
+
         <section id="audience" className="section audience">
           <div className="section-label">
             <span>{c.audience.labelLeft}</span>

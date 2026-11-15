@@ -79,6 +79,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     { id: 'workflow', title: 'Workflow' },
     { id: 'program', title: 'Программа' },
     { id: 'proof', title: 'Результат' },
+    { id: 'poster', title: 'Постер' },
     { id: 'audience', title: 'Для кого' },
     { id: 'pricing', title: 'Стоимость' },
     { id: 'final', title: 'Финал' },
@@ -490,6 +491,17 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
       `;
     }
 
+    if (state.section === 'poster') {
+      html = `
+        <h2>Постер после личного опыта</h2>
+        ${field('Вордмарк', 'poster.wordmark')}
+        ${field('Заголовок', 'poster.headline', true)}
+        ${field('Подпись', 'poster.note', true)}
+        ${field('Картинка URL', 'poster.imageUrl', false, 'url')}
+        ${field('Alt', 'poster.imageAlt')}
+      `;
+    }
+
     if (state.section === 'audience') {
       html = `
         <h2>Для кого</h2>
@@ -608,6 +620,12 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     if (!next.hero.startNote) next.hero.startNote = 'Старт 1 декабря';
     if (!next.final || typeof next.final !== 'object') next.final = {};
     if (!next.final.startNote) next.final.startNote = 'Старт 1 декабря';
+    if (!next.poster || typeof next.poster !== 'object') next.poster = {};
+    if (!next.poster.wordmark) next.poster.wordmark = 'AIWORKFLOW';
+    if (!next.poster.headline) next.poster.headline = 'Первый в мире курс который невозможно не успеть пройти';
+    if (!next.poster.note) next.poster.note = 'Потому что после внедрения агентов все что ты будешь делать, это давать инструкции нейронкам, оценивать результат и вносить правки';
+    if (!next.poster.imageUrl) next.poster.imageUrl = '/assets/pace-device.png';
+    if (!next.poster.imageAlt) next.poster.imageAlt = 'Подвесной модуль с индикатором AI';
     return next;
   }
 
