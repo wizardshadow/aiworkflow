@@ -416,13 +416,15 @@ html[data-motion=off] .nav-bar{transition:none}
 .poster-headline{margin-top:.55em;width:100%;font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:2.72cqw;line-height:1.25;letter-spacing:0;text-transform:uppercase;text-align:center;white-space:nowrap;color:var(--orange);background-image:url("/assets/pace-fill.jpg");background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-top:.2em;overflow:visible}
 .poster-note{align-self:flex-end;width:34cqw;margin-top:.9em;margin-right:6cqw;font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:max(15px,1.25cqw);line-height:1.4;letter-spacing:0;text-transform:uppercase;text-align:left;color:var(--orange);background-image:url("/assets/pace-fill.jpg");background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-top:.16em;overflow:visible}
 @media(max-width:900px){
-.poster-frame{aspect-ratio:auto;display:flex;flex-direction:column;justify-content:center;min-height:100svh;padding:28px var(--pad) 36px}
-.poster-device{position:relative;left:auto;top:auto;width:100%;height:min(52vw,280px);overflow:visible}
-.poster-device img{object-fit:contain;object-position:center 20%}
-.poster-copy{position:relative;top:auto;margin-top:4px;padding:0}
-.poster-mark{font-size:clamp(42px,12.5vw,78px)}
-.poster-headline{font-size:clamp(20px,4.8vw,32px);white-space:normal;line-height:1.25}
-.poster-note{width:100%;margin-right:0;align-self:stretch;font-size:16px;line-height:1.4;text-align:left;text-align-last:left}
+.poster-frame{aspect-ratio:auto;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;min-height:0;height:auto;padding:0 var(--pad) 36px}
+.poster-lines{display:none}
+.poster-device{position:relative;left:auto;top:0;width:min(100%,440px);height:auto;aspect-ratio:1264/1120;margin:0 auto;overflow:hidden}
+.poster-device img{position:absolute;width:162.025%;height:auto;max-width:none;left:-59.177%;top:0;object-fit:fill;object-position:left top}
+.poster-frame:hover .poster-device img{transform:none}
+.poster-copy{position:relative;top:auto;width:100%;margin-top:8px;padding:0;align-items:center;text-align:center}
+.poster-mark{font-size:clamp(42px,12.5vw,78px);text-align:center}
+.poster-headline{font-size:clamp(20px,4.8vw,32px);white-space:normal;line-height:1.25;text-align:center}
+.poster-note{width:100%;max-width:22em;margin-right:0;margin-left:0;align-self:center;font-size:16px;line-height:1.4;text-align:center;text-align-last:center}
 }
 html[data-motion=off] .poster-device img{transition:none;transform:none}
 
