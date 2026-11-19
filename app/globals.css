@@ -456,3 +456,11 @@ html[data-motion=off] .poster-device img{transition:none;transform:none}
 }
 @media(prefers-reduced-motion:reduce){.faq-panel{transition:none}}
 html[data-motion=off] .faq-panel{transition:none}
+
+/* Program weeks: stack week / topic / result on a narrow screen */
+@media(max-width:760px){
+.module-content,.weeks,.week{min-width:0}
+.table-head{display:none}
+.week{grid-template-columns:1fr;gap:8px}
+.week>span,.week h3,.week p{min-width:0;max-width:100%;overflow-wrap:break-word}
+}
