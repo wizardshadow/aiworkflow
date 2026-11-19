@@ -426,14 +426,15 @@ html[data-motion=off] .nav-bar{transition:none}
 }
 html[data-motion=off] .poster-device img{transition:none;transform:none}
 
-/* 03 — heading spans the section so «Дело не в инструментах.» stays one line */
-.workflow-intro{row-gap:28px}
-.workflow-intro h2{grid-column:1 / -1;color:var(--ink)}
+/* 03 — heading width is process columns 01–02; the first sentence stays one line */
+.workflow-intro{container-type:inline-size;row-gap:28px;align-items:start;grid-template-columns:minmax(0,50%) minmax(0,1fr)}
+.workflow-intro h2{min-width:0;color:var(--ink);font-size:clamp(34px,3.95cqw,68px)}
 .workflow-intro h2 span{color:inherit}
-.workflow-lead{white-space:nowrap}
-.workflow-intro>div{grid-column:2}
+@media(max-width:1100px){
+.workflow-intro{grid-template-columns:1fr}
+.workflow-intro h2{font-size:clamp(36px,4.2vw,68px)}
+}
 @media(max-width:760px){
-.workflow-intro>div{grid-column:1}
 .workflow-intro h2{font-size:clamp(22px,6.4vw,36px)}
 }
 
