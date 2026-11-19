@@ -469,6 +469,29 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
         ${field('Приписка перед местами', 'final.startNote')}
       `),
 
+      blockShell('faq', '09', 'Вопросы', `
+        <p class="ve-lead">${escapeHtml(c.faq.heading)}</p>
+        ${(c.faq.items || []).map((item, i) => `
+          <div class="ve-card">
+            <h4>${escapeHtml(item.q || 'Без вопроса')}</h4>
+            <p class="ve-meta">${escapeHtml(item.a || '')}</p>
+          </div>`).join('') || '<p class="ve-meta">Пока нет вопросов.</p>'}
+      `, `
+        ${field('Лейбл слева', 'faq.labelLeft')}
+        ${field('Лейбл справа', 'faq.labelRight')}
+        ${field('Заголовок', 'faq.heading', true)}
+        ${(c.faq.items || []).map((item, i) => `
+          <div class="ve-card">
+            <div class="ve-edit-actions">
+              <strong>Вопрос ${i + 1}</strong>
+              <button class="ve-btn" type="button" data-faq-remove="${i}">Удалить</button>
+            </div>
+            ${field('Вопрос', `faq.items.${i}.q`)}
+            ${field('Ответ', `faq.items.${i}.a`, true)}
+          </div>`).join('')}
+        <button class="ve-btn" type="button" data-faq-add>Добавить вопрос</button>
+      `),
+
       blockShell('footer', 'Footer', 'Подвал', `
         <p class="ve-meta">${escapeHtml(c.footer.tagline)}</p>
         <p class="ve-meta">${escapeHtml(c.footer.legal)}</p>
@@ -532,6 +555,20 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
   }
 
   document.getElementById('blocks').addEventListener('click', (e) => {
+    const faqAdd = e.target.closest('[data-faq-add]');
+    const faqRemove = e.target.closest('[data-faq-remove]');
+    if (faqAdd || faqRemove) {
+      const block = document.querySelector('[data-block="faq"]');
+      if (block) collectFrom(block);
+      if (!state.content.faq || typeof state.content.faq !== 'object') state.content.faq = {};
+      const items = Array.isArray(state.content.faq.items) ? state.content.faq.items : [];
+      if (faqAdd) items.push({ q: '', a: '' });
+      else items.splice(Number(faqRemove.getAttribute('data-faq-remove')), 1);
+      state.content.faq.items = items;
+      state.editing = 'faq';
+      render();
+      return;
+    }
     const editBtn = e.target.closest('[data-edit]');
     if (editBtn) {
       const id = editBtn.getAttribute('data-edit');
@@ -576,6 +613,20 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? 'admin'), ENT_QUOTES, 
     if (!next.poster.note) next.poster.note = 'Потому что после внедрения агентов все что ты будешь делать, это давать инструкции нейронкам, оценивать результат и вносить правки';
     if (!next.poster.imageUrl) next.poster.imageUrl = '/assets/pace-device.png';
     if (!next.poster.imageAlt) next.poster.imageAlt = 'Подвесной модуль с индикатором AI';
+    if (!next.faq || typeof next.faq !== 'object') next.faq = {};
+    if (!next.faq.labelLeft) next.faq.labelLeft = '09 / ВОПРОСЫ';
+    if (!next.faq.labelRight) next.faq.labelRight = 'ДО ЗАПИСИ';
+    if (!next.faq.heading) next.faq.heading = 'Коротко — до того как занять место.';
+    if (!Array.isArray(next.faq.items)) {
+      next.faq.items = [
+        { q: 'Нужно ли уметь кодить?', a: 'Нет. Ты ведёшь проект как дизайнер: бриф, решения, проверка. Агенты собирают, верстают и запускают по твоему заданию.' },
+        { q: 'Это курс про картинки из нейросети?', a: 'Нет. Картинка — маленький кусок. ИИ встраивается в бриф, концепцию, продакшн и запуск. Решение на каждом шаге остаётся за тобой.' },
+        { q: 'Сколько длится и что делаем?', a: '12 недель практики на своих задачах. Три проекта: лендинг, многостраничный сайт и веб-сервис с админкой.' },
+        { q: 'Что останется после курса?', a: 'Три рабочих кейса в портфолио, карта внедрения ИИ в твой процесс, шаблоны брифа и хендоффа, проверенные промты.' },
+        { q: 'Как оплатить?', a: 'Для участников эфира 40 000 ₽ вместо 60 000 ₽. Рассрочка без переплат на 3, 6 или 10 месяцев.' },
+        { q: 'Когда старт?', a: '1 декабря. Набор закрывается в этот день или когда закончатся места.' },
+      ];
+    }
     return next;
   }
 

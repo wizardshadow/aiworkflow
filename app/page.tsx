@@ -23,6 +23,46 @@ function BrText({ text }: { text: string }) {
   );
 }
 
+function FaqList({ items }: { items: { q: string; a: string }[] }) {
+  const [open, setOpen] = useState<number | null>(null);
+  return (
+    <div className="faq-list">
+      {items.map((item, i) => {
+        const isOpen = open === i;
+        return (
+          <article key={`${i}-${item.q}`} className={isOpen ? "faq-item is-open" : "faq-item"}>
+            <h3 className="faq-heading">
+              <button
+                className="faq-trigger"
+                type="button"
+                aria-expanded={isOpen}
+                aria-controls={`faq-panel-${i}`}
+                id={`faq-trigger-${i}`}
+                onClick={() => setOpen(isOpen ? null : i)}
+              >
+                <span>{item.q}</span>
+                <span className="faq-icon" aria-hidden="true">+</span>
+              </button>
+            </h3>
+            <div
+              className="faq-panel"
+              id={`faq-panel-${i}`}
+              role="region"
+              aria-labelledby={`faq-trigger-${i}`}
+              aria-hidden={!isOpen}
+              inert={!isOpen}
+            >
+              <div className="faq-clip">
+                <p>{item.a}</p>
+              </div>
+            </div>
+          </article>
+        );
+      })}
+    </div>
+  );
+}
+
 export default function Home() {
   const c = useSiteContent();
   const [menu, setMenu] = useState(false);
@@ -516,8 +556,12 @@ export default function Home() {
           </div>
           <div className="workflow-intro reveal">
             <h2>
-              <BrText text={c.workflow.heading} />
-              <span>{c.workflow.headingAccent}</span>
+              <span className="workflow-lead">
+                {c.workflow.heading.replace(/\s*\n\s*/g, " ").trim()}
+              </span>
+              {c.workflow.headingAccent ? (
+                <span className="workflow-rest"> {c.workflow.headingAccent}</span>
+              ) : null}
             </h2>
             <div>
               <p>{c.workflow.p1}</p>
@@ -813,6 +857,17 @@ export default function Home() {
               {seatsLeft}
             </div>
           </div>
+        </section>
+
+        <section id="faq" className="section faq">
+          <div className="section-label">
+            <span>{c.faq.labelLeft}</span>
+            <span>{c.faq.labelRight}</span>
+          </div>
+          <div className="section-heading reveal">
+            <h2>{c.faq.heading}</h2>
+          </div>
+          <FaqList items={c.faq.items} />
         </section>
       </main>
       <footer className="site-footer">
