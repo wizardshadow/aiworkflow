@@ -83,6 +83,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     { id: 'audience', title: 'Для кого' },
     { id: 'pricing', title: 'Стоимость' },
     { id: 'final', title: 'Финал' },
+    { id: 'faq', title: 'Вопросы' },
     { id: 'footer', title: 'Футер' },
     { id: 'enroll', title: 'Модалка записи' },
     { id: 'success', title: 'Success' },
@@ -191,6 +192,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
       collectValueStack();
       collectProofStats();
       collectNavItems();
+      collectFaq();
       state.section = btn.getAttribute('data-section');
       render();
     };
@@ -245,6 +247,20 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
       else byIndex[i][key] = el.value;
     });
     state.content.pricing.valueStack = Object.keys(byIndex).sort((a,b)=>a-b).map((i) => byIndex[i]);
+  }
+
+  function collectFaq() {
+    const rows = [...document.querySelectorAll('[data-faq-index]')];
+    if (!rows.length) return;
+    const byIndex = {};
+    rows.forEach((el) => {
+      const i = el.getAttribute('data-faq-index');
+      const key = el.getAttribute('data-faq-key');
+      byIndex[i] = byIndex[i] || { q: '', a: '' };
+      byIndex[i][key] = el.value;
+    });
+    if (!state.content.faq || typeof state.content.faq !== 'object') state.content.faq = {};
+    state.content.faq.items = Object.keys(byIndex).sort((a, b) => a - b).map((i) => byIndex[i]);
   }
 
   function collectProofStats() {
@@ -563,6 +579,29 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
       `;
     }
 
+    if (state.section === 'faq') {
+      const items = c.faq?.items || [];
+      html = `
+        <h2>Вопросы</h2>
+        <p class="hint">Блок после «08 / Решение». Клик на сайте раскрывает ответ.</p>
+        <div class="grid-2">
+          ${field('Лейбл слева', 'faq.labelLeft')}
+          ${field('Лейбл справа', 'faq.labelRight')}
+        </div>
+        ${field('Заголовок', 'faq.heading', true)}
+        ${items.map((item, i) => `
+          <div class="block">
+            <div class="row-actions" style="justify-content:space-between;margin-bottom:8px">
+              <h3 style="margin:0">Вопрос ${i + 1}</h3>
+              <button class="btn btn-ghost" type="button" data-faq-remove="${i}">Удалить</button>
+            </div>
+            <div class="field"><label>Вопрос</label><input data-faq-index="${i}" data-faq-key="q" value="${escapeAttr(item.q || '')}" /></div>
+            <div class="field"><label>Ответ</label><textarea data-faq-index="${i}" data-faq-key="a">${escapeHtml(item.a || '')}</textarea></div>
+          </div>`).join('')}
+        <button class="btn" type="button" data-faq-add>Добавить вопрос</button>
+      `;
+    }
+
     if (state.section === 'footer') {
       html = `
         <h2>Футер</h2>
@@ -626,6 +665,20 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     if (!next.poster.note) next.poster.note = 'Потому что после внедрения агентов все что ты будешь делать, это давать инструкции нейронкам, оценивать результат и вносить правки';
     if (!next.poster.imageUrl) next.poster.imageUrl = '/assets/pace-device.png';
     if (!next.poster.imageAlt) next.poster.imageAlt = 'Подвесной модуль с индикатором AI';
+    if (!next.faq || typeof next.faq !== 'object') next.faq = {};
+    if (!next.faq.labelLeft) next.faq.labelLeft = '09 / ВОПРОСЫ';
+    if (!next.faq.labelRight) next.faq.labelRight = 'ДО ЗАПИСИ';
+    if (!next.faq.heading) next.faq.heading = 'Коротко — до того как занять место.';
+    if (!Array.isArray(next.faq.items)) {
+      next.faq.items = [
+        { q: 'Нужно ли уметь кодить?', a: 'Нет. Ты ведёшь проект как дизайнер: бриф, решения, проверка. Агенты собирают, верстают и запускают по твоему заданию.' },
+        { q: 'Это курс про картинки из нейросети?', a: 'Нет. Картинка — маленький кусок. ИИ встраивается в бриф, концепцию, продакшн и запуск. Решение на каждом шаге остаётся за тобой.' },
+        { q: 'Сколько длится и что делаем?', a: '12 недель практики на своих задачах. Три проекта: лендинг, многостраничный сайт и веб-сервис с админкой.' },
+        { q: 'Что останется после курса?', a: 'Три рабочих кейса в портфолио, карта внедрения ИИ в твой процесс, шаблоны брифа и хендоффа, проверенные промты.' },
+        { q: 'Как оплатить?', a: 'Для участников эфира 40 000 ₽ вместо 60 000 ₽. Рассрочка без переплат на 3, 6 или 10 месяцев.' },
+        { q: 'Когда старт?', a: '1 декабря. Набор закрывается в этот день или когда закончатся места.' },
+      ];
+    }
     return next;
   }
 
@@ -646,6 +699,7 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
     collectValueStack();
     collectProofStats();
     collectNavItems();
+    collectFaq();
     state.content = ensureContentShape(state.content);
     setStatus('Сохранение…');
     $('#saveBtn').disabled = true;
@@ -689,6 +743,18 @@ $user = htmlspecialchars((string)($_SESSION['aw_user'] ?? ''), ENT_QUOTES, 'UTF-
   });
   $('#saveBtn').addEventListener('click', saveContent);
   $('#reloadBtn').addEventListener('click', () => loadContent().catch((e) => setStatus(e.message, 'error')));
+  $('#editor').addEventListener('click', (e) => {
+    const add = e.target.closest('[data-faq-add]');
+    const remove = e.target.closest('[data-faq-remove]');
+    if (!add && !remove) return;
+    collectFields();
+    collectFaq();
+    const items = state.content.faq.items || [];
+    if (add) items.push({ q: '', a: '' });
+    else items.splice(Number(remove.getAttribute('data-faq-remove')), 1);
+    state.content.faq.items = items;
+    render();
+  });
 
   (async () => {
     try {

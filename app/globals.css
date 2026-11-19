@@ -413,15 +413,46 @@ html[data-motion=off] .nav-bar{transition:none}
 .poster-frame:hover .poster-device img{transform:scale(1.02)}
 .poster-copy{position:absolute;left:0;right:0;top:52%;z-index:3;display:flex;flex-direction:column;align-items:center;text-align:center;padding:0 4%}
 .poster-mark{font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:8.95cqw;line-height:.85;letter-spacing:0;text-transform:uppercase;color:var(--ink);text-box-trim:trim-both;text-box-edge:cap alphabetic}
-.poster-headline{margin-top:.55em;width:100%;font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:2.72cqw;line-height:.9;letter-spacing:0;text-transform:uppercase;text-align:center;white-space:nowrap;color:var(--orange);background-image:url("/assets/pace-fill.jpg");background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;text-box-trim:trim-both;text-box-edge:cap alphabetic}
-.poster-note{align-self:flex-end;width:34cqw;margin-top:.9em;margin-right:6cqw;font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:max(15px,1.25cqw);line-height:1.12;letter-spacing:0;text-transform:uppercase;text-align:left;color:var(--orange);background-image:url("/assets/pace-fill.jpg");background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.poster-headline{margin-top:.55em;width:100%;font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:2.72cqw;line-height:1.25;letter-spacing:0;text-transform:uppercase;text-align:center;white-space:nowrap;color:var(--orange);background-image:url("/assets/pace-fill.jpg");background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-top:.2em;overflow:visible}
+.poster-note{align-self:flex-end;width:34cqw;margin-top:.9em;margin-right:6cqw;font-family:Sonko,Arial,sans-serif;font-weight:500;font-size:max(15px,1.25cqw);line-height:1.4;letter-spacing:0;text-transform:uppercase;text-align:left;color:var(--orange);background-image:url("/assets/pace-fill.jpg");background-size:cover;background-position:center;-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;padding-top:.16em;overflow:visible}
 @media(max-width:900px){
 .poster-frame{aspect-ratio:auto;display:flex;flex-direction:column;justify-content:center;min-height:100svh;padding:28px var(--pad) 36px}
 .poster-device{position:relative;left:auto;top:auto;width:100%;height:min(52vw,280px);overflow:visible}
 .poster-device img{object-fit:contain;object-position:center 20%}
 .poster-copy{position:relative;top:auto;margin-top:4px;padding:0}
 .poster-mark{font-size:clamp(42px,12.5vw,78px)}
-.poster-headline{font-size:clamp(20px,4.8vw,32px);white-space:normal;line-height:.95}
-.poster-note{width:100%;margin-right:0;align-self:stretch;font-size:16px;line-height:1.25;text-align:left;text-align-last:left}
+.poster-headline{font-size:clamp(20px,4.8vw,32px);white-space:normal;line-height:1.25}
+.poster-note{width:100%;margin-right:0;align-self:stretch;font-size:16px;line-height:1.4;text-align:left;text-align-last:left}
 }
 html[data-motion=off] .poster-device img{transition:none;transform:none}
+
+/* 03 — heading spans the section so «Дело не в инструментах.» stays one line */
+.workflow-intro{row-gap:28px}
+.workflow-intro h2{grid-column:1 / -1;color:var(--ink)}
+.workflow-intro h2 span{color:inherit}
+.workflow-lead{white-space:nowrap}
+.workflow-intro>div{grid-column:2}
+@media(max-width:760px){
+.workflow-intro>div{grid-column:1}
+.workflow-intro h2{font-size:clamp(22px,6.4vw,36px)}
+}
+
+/* 09 — FAQ, same motion as program modules */
+.faq-list{border-top:2px solid var(--ink)}
+.faq-item{border-bottom:1px solid var(--ink)}
+.faq-heading{margin:0}
+.faq-trigger{display:grid;grid-template-columns:1fr 50px;align-items:center;gap:20px;width:100%;padding:26px 0;background:none;text-align:left;font-size:clamp(22px,2.4vw,34px);font-weight:500;line-height:1.2}
+.faq-trigger:hover>span:first-child{color:var(--orange)}
+.faq-icon{font-size:34px;text-align:center;line-height:1;transition:transform .3s}
+.faq-item.is-open .faq-icon{transform:rotate(45deg);color:var(--orange)}
+.faq-panel{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.22,1,.36,1)}
+.faq-item.is-open .faq-panel{grid-template-rows:1fr}
+.faq-clip{overflow:hidden}
+.faq-clip p{max-width:760px;padding:0 70px 28px 0;line-height:1.5;color:#5b646c}
+@media(max-width:760px){
+.faq-trigger{grid-template-columns:1fr 28px;gap:12px;padding:20px 0;font-size:22px}
+.faq-icon{font-size:26px}
+.faq-clip p{padding:0 0 20px}
+}
+@media(prefers-reduced-motion:reduce){.faq-panel{transition:none}}
+html[data-motion=off] .faq-panel{transition:none}

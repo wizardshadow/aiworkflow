@@ -24,6 +24,8 @@ export type ProofStat = { a: string; b: string; c: string; label: string };
 
 export type ValueRow = { item: string; price: string; priceless?: boolean };
 
+export type FaqItem = { q: string; a: string };
+
 export type SeatsContent = {
   remaining: number;
   total: number;
@@ -157,6 +159,12 @@ export type SiteContent = {
     /** Префикс перед «Осталось N из M», напр. «Старт 1 декабря». */
     startNote: string;
   };
+  faq: {
+    labelLeft: string;
+    labelRight: string;
+    heading: string;
+    items: FaqItem[];
+  };
   footer: {
     tagline: string;
     legal: string;
@@ -286,7 +294,7 @@ export const DEFAULT_CONTENT: SiteContent = {
   workflow: {
     labelLeft: "03 / ОДНА СИСТЕМА",
     labelRight: "HUMAN-LED. AI-POWERED.",
-    heading: "Дело не\nв инструментах.",
+    heading: "Дело не в инструментах.",
     headingAccent: "Дело в том, как они встроены в процесс.",
     p1: "Проблема 90% дизайнеров, которые попробовали ИИ, одна и та же: они используют нейросеть как генератор картинок. Отсюда и появляется ощущение, что ИИ только для контента, изображений и видео.",
     p2: "На самом деле ИИ можно встроить в каждый этап процесса, и на каждом этапе у него своя роль, свои границы и свой способ проверки.",
@@ -519,6 +527,37 @@ export const DEFAULT_CONTENT: SiteContent = {
     cta: "ЗАНЯТЬ МЕСТО НА ПОТОКЕ",
     startNote: "Старт 1 декабря",
   },
+  faq: {
+    labelLeft: "09 / ВОПРОСЫ",
+    labelRight: "ДО ЗАПИСИ",
+    heading: "Коротко — до того как занять место.",
+    items: [
+      {
+        q: "Нужно ли уметь кодить?",
+        a: "Нет. Ты ведёшь проект как дизайнер: бриф, решения, проверка. Агенты собирают, верстают и запускают по твоему заданию.",
+      },
+      {
+        q: "Это курс про картинки из нейросети?",
+        a: "Нет. Картинка — маленький кусок. ИИ встраивается в бриф, концепцию, продакшн и запуск. Решение на каждом шаге остаётся за тобой.",
+      },
+      {
+        q: "Сколько длится и что делаем?",
+        a: "12 недель практики на своих задачах. Три проекта: лендинг, многостраничный сайт и веб-сервис с админкой.",
+      },
+      {
+        q: "Что останется после курса?",
+        a: "Три рабочих кейса в портфолио, карта внедрения ИИ в твой процесс, шаблоны брифа и хендоффа, проверенные промты.",
+      },
+      {
+        q: "Как оплатить?",
+        a: "Для участников эфира 40 000 ₽ вместо 60 000 ₽. Рассрочка без переплат на 3, 6 или 10 месяцев.",
+      },
+      {
+        q: "Когда старт?",
+        a: "1 декабря. Набор закрывается в этот день или когда закончатся места.",
+      },
+    ],
+  },
   footer: {
     tagline:
       "© AI WorkFlow — Стань незаменимым специалистом способным создать и вести проект от брифа до релиза готового продукта",
@@ -634,6 +673,11 @@ export function mergeSiteContent(
         partial.pricing?.valueStack ?? DEFAULT_CONTENT.pricing.valueStack,
     },
     final: { ...DEFAULT_CONTENT.final, ...partial.final },
+    faq: {
+      ...DEFAULT_CONTENT.faq,
+      ...partial.faq,
+      items: partial.faq?.items ?? DEFAULT_CONTENT.faq.items,
+    },
     footer: { ...DEFAULT_CONTENT.footer, ...partial.footer },
     enroll: { ...DEFAULT_CONTENT.enroll, ...partial.enroll },
     success: { ...DEFAULT_CONTENT.success, ...partial.success },
